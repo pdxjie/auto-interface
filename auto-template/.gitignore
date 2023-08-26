@@ -23,11 +23,5 @@
 hs_err_pid*
 replay_pid*
 
-# 本目录下
 .idea/**
-# 后端模板下的文件
-auto-template/.idea/**
-auto-template/target/**
-# 前端项目下忽略文件
-auto-view/.idea/**
-auto-view/node_modules/**
+target/**
