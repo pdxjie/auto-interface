@@ -25,9 +25,9 @@
               <span>账户设置</span>
             </router-link>
           </a-menu-item>
-          <a-menu-item key="2" disabled>
+          <a-menu-item key="2">
             <a-icon type="setting"/>
-            <span>测试</span>
+            <span>管理中心</span>
           </a-menu-item>
           <a-menu-divider/>
           <a-menu-item key="3">
