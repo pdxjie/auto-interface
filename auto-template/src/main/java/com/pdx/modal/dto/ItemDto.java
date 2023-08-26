@@ -1,29 +1,17 @@
-package com.pdx.entity;
+package com.pdx.modal.dto;
 
-import com.baomidou.mybatisplus.annotation.TableName;
-import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
-import lombok.EqualsAndHashCode;
 
 import java.io.Serializable;
 import java.util.Date;
 
 /**
- * <p>
- * 
- * </p>
- *
  * @author 派同学
  * @since 2023-08-26
  */
 @Data
-@EqualsAndHashCode(callSuper = false)
-@TableName("auto_item")
-@ApiModel(value="Item对象", description="")
-public class Item implements Serializable {
-
-    private static final long serialVersionUID=1L;
+public class ItemDto implements Serializable {
 
     @ApiModelProperty(value = "主键")
     private String id;
@@ -43,9 +31,18 @@ public class Item implements Serializable {
     @ApiModelProperty(value = "创建时间")
     private Date createTime;
 
-    @ApiModelProperty(value = "修改时间")
-    private Date updateTime;
-
     @ApiModelProperty(value = "截止时间")
     private Date dateLine;
+
+    @ApiModelProperty(value = "负责人")
+    private String userId;
+
+    @ApiModelProperty(value = "负责人")
+    private String nickName;
+
+    @ApiModelProperty(value = "是否是项目负责人")
+    private boolean isItemOwner;
+
+    @ApiModelProperty(value = "身份")
+    private Integer identity;
 }

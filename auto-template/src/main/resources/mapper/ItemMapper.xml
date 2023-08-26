@@ -2,4 +2,33 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.pdx.mapper.ItemMapper">
 
+    <select id="queryItemByCondition" resultType="com.pdx.modal.dto.ItemDto">
+        SELECT
+            ai.*,
+            aui.user_id,
+            aui.identity
+        FROM auto_item ai
+        LEFT JOIN auto_user_item aui ON ai.id = aui.item_id
+        WHERE (aui.user_id = #{userId} OR ai.id IN (
+                SELECT auto_user_item.item_id
+                FROM auto_user_item
+                WHERE auto_user_item.user_id = #{userId}
+            ))
+            <if test="name != null and name != ''">
+                and ai.name like #{name}
+            </if>
+        order by ai.create_time
+        limit #{size} offset #{startPage}
+    </select>
+    <select id="queryItemTotalCount" resultType="java.lang.Integer">
+        SELECT
+        COUNT(*)
+        FROM auto_item ai
+        LEFT JOIN auto_user_item aui ON ai.id = aui.item_id
+        WHERE (aui.user_id = #{userId} OR ai.id IN (
+            SELECT auto_user_item.item_id
+            FROM auto_user_item
+            WHERE auto_user_item.user_id = #{userId}
+        ))
+    </select>
 </mapper>

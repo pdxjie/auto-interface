@@ -2,6 +2,10 @@ package com.pdx.mapper;
 
 import com.pdx.entity.Item;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import com.pdx.modal.dto.ItemDto;
+import org.apache.ibatis.annotations.Param;
+
+import java.util.List;
 
 /**
  * <p>
@@ -13,4 +17,22 @@ import com.baomidou.mybatisplus.core.mapper.BaseMapper;
  */
 public interface ItemMapper extends BaseMapper<Item> {
 
+    /**
+     * 条件分页查询
+     *
+     * @param userId
+     * @param name
+     * @param startPage
+     * @param pageSize
+     * @return
+     */
+    List<ItemDto> queryItemByCondition(@Param("userId") String userId, @Param("name")String name, @Param("startPage")Integer startPage, @Param("size")Integer pageSize);
+
+    /**
+     * 查询总数
+     *
+     * @param userId
+     * @return
+     */
+    Integer queryItemTotalCount(String userId);
 }
