@@ -13,7 +13,6 @@ import PermissionHelper from '@/utils/helper/permission'
 VueClipboard.config.autoSetContainer = true
 
 Vue.use(Viser)
-
 Vue.use(VueStorage, config.storageOptions)
 Vue.use(VueClipboard)
 Vue.use(PermissionHelper)

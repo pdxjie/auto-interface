@@ -1,28 +1,31 @@
-import api from './index'
+/**
+ * 基础前置操作
+ */
+
 import { axios } from '@/utils/request'
 
 /**
- * login func
- * parameter: {
- *     username: '',
- *     password: '',
- *     remember_me: true,
- *     captcha: '12345'
- * }
  * @param parameter
  * @returns {*}
  */
 export function login (parameter) {
   return axios({
-    url: '/auth/login',
+    url: '/basic/login',
     method: 'post',
     data: parameter
   })
 }
 
-export function getSmsCaptcha (parameter) {
+export function getSmsCaptcha (email) {
   return axios({
-    url: api.SendSms,
+    url: '/basic/captcha/' + email,
+    method: 'get'
+  })
+}
+
+export function register (parameter) {
+  return axios({
+    url: '/basic/register',
     method: 'post',
     data: parameter
   })
@@ -30,7 +33,7 @@ export function getSmsCaptcha (parameter) {
 
 export function getInfo () {
   return axios({
-    url: '/user/info',
+    url: '/basic/info',
     method: 'get',
     headers: {
       'Content-Type': 'application/json;charset=UTF-8'
@@ -38,9 +41,16 @@ export function getInfo () {
   })
 }
 
+export function getCurrentUserNav (token) {
+  return axios({
+    url: '/user/nav',
+    method: 'get'
+  })
+}
+
 export function logout () {
   return axios({
-    url: '/auth/logout',
+    url: '/basic/logout',
     method: 'post',
     headers: {
       'Content-Type': 'application/json;charset=UTF-8'
@@ -49,13 +59,12 @@ export function logout () {
 }
 
 /**
- * get user 2step code open?
- * @param parameter {*}
+ * 聊天记录
+ * @returns {AxiosPromise}
  */
-export function get2step (parameter) {
+export function messageHistory () {
   return axios({
-    url: api.twoStepCode,
-    method: 'post',
-    data: parameter
+    url: '/pdx/message/history',
+    method: 'get'
   })
 }
