@@ -45,4 +45,10 @@ public class ItemDto implements Serializable {
 
     @ApiModelProperty(value = "身份")
     private Integer identity;
+
+    @ApiModelProperty(value = "自动化测试进度")
+    private Integer percent;
+
+    @ApiModelProperty(value = "状态 1 未开始 2 进行中 3 已结束")
+    private Integer status;
 }

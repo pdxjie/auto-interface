@@ -1,5 +1,7 @@
 package com.pdx.entity;
 
+import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
@@ -26,6 +28,7 @@ public class Item implements Serializable {
     private static final long serialVersionUID=1L;
 
     @ApiModelProperty(value = "主键")
+    @TableId(value = "id", type = IdType.ID_WORKER_STR)
     private String id;
 
     @ApiModelProperty(value = "图标")
@@ -48,4 +51,7 @@ public class Item implements Serializable {
 
     @ApiModelProperty(value = "截止时间")
     private Date dateLine;
+
+    @ApiModelProperty(value = "状态 1 未开始 2 进行中 3 已结束")
+    private Integer status;
 }

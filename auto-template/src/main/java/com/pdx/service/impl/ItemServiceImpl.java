@@ -1,6 +1,5 @@
 package com.pdx.service.impl;
 
-import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.pdx.entity.Item;
 import com.pdx.entity.User;
@@ -60,11 +59,12 @@ public class ItemServiceImpl extends ServiceImpl<ItemMapper, Item> implements It
         // SQL 查询
         List<ItemDto> itemDtos = baseMapper.queryItemByCondition(userId, vo.getName(), startPage, vo.getPageSize());
         itemDtos.forEach(itemDto -> {
-            User user = userMapper.selectOne(new QueryWrapper<User>().eq("id", itemDto.getUserId()).select("nick_name"));
+            User user = userMapper.selectById(itemDto.getUserId());
             if (itemDto.getIdentity() == 1 && itemDto.getUserId().equals(userId)) {
                 itemDto.setItemOwner(true);
             }
             itemDto.setNickName(user.getNickName());
+            itemDto.setPercent(0);
         });
         // TODO 后续封装 自动化测试进度 以及 项目的状态 未开始 进行中 已结束
         // 查询总数
