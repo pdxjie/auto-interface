@@ -9,10 +9,12 @@ import Viser from 'viser-vue'
 // ext library
 import VueClipboard from 'vue-clipboard2'
 import PermissionHelper from '@/utils/helper/permission'
+import { Form } from 'ant-design-vue'
 
 VueClipboard.config.autoSetContainer = true
 
 Vue.use(Viser)
 Vue.use(VueStorage, config.storageOptions)
 Vue.use(VueClipboard)
+Vue.use(Form)
 Vue.use(PermissionHelper)

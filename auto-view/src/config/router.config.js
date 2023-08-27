@@ -30,23 +30,23 @@ export const asyncRouterMap = [
         ]
       },
       // list
-      {
-        path: '/list',
-        name: 'list',
-        component: BlankLayout,
-        // 隐藏子菜单
-        hideChildrenInMenu: true,
-        redirect: '/list/card',
-        meta: { title: '项目广场', icon: 'table' },
-        children: [
-          {
-            path: '/list/card',
-            name: 'CardList',
-            component: () => import('@/views/list/CardList'),
-            meta: { title: '项目广场' }
-          }
-        ]
-      },
+      // {
+      //   path: '/list',
+      //   name: 'list',
+      //   component: BlankLayout,
+      //   // 隐藏子菜单
+      //   hideChildrenInMenu: true,
+      //   redirect: '/list/card',
+      //   meta: { title: '项目广场', icon: 'table' },
+      //   children: [
+      //     {
+      //       path: '/list/card',
+      //       name: 'CardList',
+      //       component: () => import('@/views/list/CardList'),
+      //       meta: { title: '项目广场' }
+      //     }
+      //   ]
+      // },
       {
         path: '/mine',
         name: 'mine',
@@ -63,6 +63,13 @@ export const asyncRouterMap = [
             meta: { title: '我的项目' }
           }
         ]
+      },
+      {
+        path: '/auto',
+        name: 'Auto',
+        component: () => import('@/views/mine/components/AutoLabInfo'),
+        hidden: true,
+        meta: { title: '自动化测试' }
       },
       // Exception
       {

@@ -11,12 +11,11 @@ import bootstrap from './core/bootstrap'
 import './core/use'
 import './permission' // permission control
 import './utils/filter' // global filter
-
+import '@/styles/theme-v1.less'
 Vue.config.productionTip = false
 
 // mount axios Vue.$http and this.$http
 Vue.use(VueAxios)
-
 new Vue({
   router,
   store,

@@ -21,10 +21,12 @@
     <a-list
       :grid="{gutter: 24, lg: 4, md: 2, sm: 1, xs: 1}"
       :dataSource="dataSource"
+      :pagination="pagination"
+      :loading="loading"
     >
       <a-list-item slot="renderItem" slot-scope="item">
         <template v-if="item === null">
-          <a-button class="new-btn" style="height: 361px" type="dashed">
+          <a-button @click="insertItemInfo" class="new-btn" style="height: 361px" type="dashed">
             <a-icon type="plus"/>
             新增项目
           </a-button>
@@ -32,13 +34,24 @@
         <template v-else>
           <a-card class="ant-pro-pages-list-projects-card custom-card" hoverable>
             <template slot="actions" class="ant-card-actions">
-              <span>
+              <span v-if="item.itemOwner">
                 <a-tooltip placement="top">
                   <template slot="title">
                     <span>编辑项目</span>
                   </template>
-                  <a-icon key="edit" type="edit" />
+                  <a-icon @click="updateItemInfo(item)" key="edit" type="edit" />
                 </a-tooltip>
+              </span>
+              <span v-if="item.itemOwner">
+                <a-popconfirm
+                  title="确定要删除该项目吗?"
+                  ok-text="确定"
+                  cancel-text="取消"
+                  @confirm="confirm(item.id)"
+                  @cancel="cancel"
+                >
+                  <a-icon style="color: red" key="delete" type="delete" />
+                </a-popconfirm>
               </span>
               <span>
                 <a-tooltip placement="top">
@@ -55,9 +68,9 @@
               </span>
             </template>
             <div style="height: 100px;text-align: center">
-              <img @click="lookDetail(item)" style="border-radius: 50%;width: 100px;height: 100px" slot="cover" :src="item.covers" :alt="item.name" />
+              <img @click="lookDetail(item.id)" style="border-radius: 50%;width: 100px;height: 100px" slot="cover" :src="item.cover" :alt="item.name" />
             </div>
-            <a-card-meta :title="item.name" style="height: 73px!important;" @click="lookDetail(item)">
+            <a-card-meta :title="item.name" style="height: 73px!important;" @click="lookDetail(item.id)">
               <template slot="title">
                 <ellipsis :length="20">{{ item.name }}</ellipsis>
               </template>
@@ -65,13 +78,13 @@
                 <ellipsis :length="50">{{ item.description }}</ellipsis>
               </template>
             </a-card-meta>
-            <div style="height: 100px;display: flex;flex-direction: column;justify-content: space-around">
+            <div style="height: 100px;display: flex;flex-direction: column;justify-content: space-around" @click="lookDetail(item.id)">
               <div>
                 <a-tooltip placement="topLeft">
                   <template slot="title">
                     <span>自动化测试进度</span>
                   </template>
-                  <a-progress showInfo :percent="60" />
+                  <a-progress showInfo :percent="item.percent" />
                 </a-tooltip>
               </div>
               <div class="font-size-14" style="color: #a8a8a8">
@@ -80,7 +93,7 @@
                     <template slot="title">
                       <span>自动化测试周期</span>
                     </template>
-                    <span>2023-08-23</span> ~ <span>2023-08-24</span>
+                    <span>{{ item.createTime | fromNow }}</span> ~ <span>{{ item.dateLine | fromNow }}</span>
                   </a-tooltip>
                 </div>
               </div>
@@ -94,6 +107,8 @@
         </template>
       </a-list-item>
     </a-list>
+    <!-- 操作项目 -->
+    <ItemOperate @operateSuccess="operateSuccess" :type="type" ref="itemOperate" />
   </div>
 </template>
 
@@ -103,24 +118,13 @@ import { DEVICE_TYPE } from '@/utils/device'
 import { mapGetters, mapState } from 'vuex'
 import moment from 'moment'
 import { TagSelect, StandardFormRow, Ellipsis, AvatarList } from '@/components'
+import { homePages, removeItemById } from '@/api/item'
+import ItemOperate from '@/views/mine/components/ItemOperate'
 const TagSelectOption = TagSelect.Option
 const AvatarListItem = AvatarList.Item
-const dataSource = []
-dataSource.push(null)
-for (let i = 0; i < 11; i++) {
-  dataSource.push({
-    name: 'Alipay',
-    covers: 'https://edu-2330.oss-cn-beijing.aliyuncs.com/icon-images/1.jpg',
-    description: '在中台产品的研发过程中，会出现不同的设计规范和实现方式，但其中往往存在很多类似的页面和组件，这些类似的组件会被抽离成一套标准规范。',
-    percent: i === 0 ? 15 : (i * 10),
-    createTime: '2023-0' + (i + 1) + '-20',
-    dateLine: '2023-0' + (i + 1) + '-25',
-    status: Math.floor(Math.random() * 3) + 1
-  })
-}
-
 export default {
   components: {
+    ItemOperate,
     AvatarList,
     AvatarListItem,
     Ellipsis,
@@ -131,21 +135,101 @@ export default {
   name: 'CardList',
   data () {
     return {
-      dataSource,
-      itemVo: {}
+      dataSource: [],
+      itemVo: {
+        name: '',
+        current: 1,
+        pageSize: 11
+      },
+      pagination: {
+        size: 'large',
+        current: 1,
+        pageSize: 10,
+        total: 0,
+        showTotal: (total, range) => {
+          return ' 共' + total + '条'
+        }
+      },
+      loading: false,
+      type: '',
+      currentId: ''
     }
+  },
+  filters: {
+    fromNow (date) {
+      return moment(date).format('YYYY-MM-DD')
+    }
+  },
+  mounted () {
+    this.searchOperate()
   },
   methods: {
     isMobile () {
       return this.device === DEVICE_TYPE.MOBILE
     },
-    toSearch () {},
-    toResetCondition () {
-      this.itemVo = {}
+    insertItemInfo () {
+      this.type = 'insert'
+      this.$refs.itemOperate.visible = true
+      this.$refs.itemOperate.itemInfo = {}
+      this.$refs.itemOperate.iconUrl = ''
+    },
+    // 表格改变时触发
+    handleTableChange (pagination, filters, sorter) {
+      this.pagination = pagination
+      this.itemVo.current = pagination.current
+      this.itemVo.pageSize = pagination.pageSize
+      this.searchOperate()
+    },
+    toSearch () {
+      this.searchOperate()
+    },
+    async searchOperate () {
+      this.loading = true
+      const { data } = await homePages(this.itemVo)
+      const items = []
+      items.push(null)
+      this.pagination.total = data.total
+      this.dataSource = data.items.concat(items)
+      this.loading = false
     },
     toRelase () {},
-    lookDetail (item) {},
-    copyAddress (item) {}
+    // 进入项目，查看详情
+    lookDetail (id) {
+      this.$router.push({
+        path: '/auto',
+        query: {
+          id: id
+        }
+      })
+    },
+    copyAddress (item) {},
+    updateItemInfo (item) {
+      this.type = 'update'
+      this.$refs.itemOperate.itemInfo = item
+      this.$refs.itemOperate.iconUrl = item.cover
+      this.$refs.itemOperate.visible = true
+    },
+    operateSuccess (code) {
+      if (code === 200) {
+        this.searchOperate()
+      }
+    },
+    // 移除项目
+    async removeItem (id) {
+      const data = await removeItemById(id)
+      if (data.code === 200) {
+        this.$message.success('移除成功')
+        this.searchOperate()
+      }
+    },
+    // 确认删除
+    confirm (id) {
+      this.removeItem(id)
+    },
+    // 取消删除
+    cancel () {
+      this.$message.info('已取消')
+    }
   },
   computed: {
     ...mapGetters(['userInfo', 'token']),
