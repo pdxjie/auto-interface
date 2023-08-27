@@ -7,15 +7,15 @@ import org.springframework.web.bind.annotation.RestController;
 
 /**
  * <p>
- *  前端控制器
+ * 项目模块 前端控制器
  * </p>
  *
  * @author 派同学
- * @since 2023-08-26
+ * @since 2023-08-27
  */
 @RestController
-@RequestMapping("/pdx/case-item")
-public class CaseItemController {
+@RequestMapping("/pdx/module")
+public class ModuleController {
 
 }
 

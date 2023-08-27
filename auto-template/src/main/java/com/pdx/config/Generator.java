@@ -57,7 +57,7 @@ public class Generator {
         // 5、策略配置
         StrategyConfig strategy = new StrategyConfig();
         //strategy.setInclude("ks_\\w*");设置要映射的表名
-        strategy.setInclude("auto_item", "auto_user_item", "auto_case_item");
+        strategy.setInclude("auto_module", "auto_module_case", "auto_module_item");
         strategy.setNaming(NamingStrategy.underline_to_camel);//数据库表映射到实体的命名策略
         strategy.setTablePrefix("auto_");//设置表前缀不生成
 

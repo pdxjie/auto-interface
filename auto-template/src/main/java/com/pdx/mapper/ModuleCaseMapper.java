@@ -1,6 +1,6 @@
 package com.pdx.mapper;
 
-import com.pdx.entity.CaseItem;
+import com.pdx.entity.ModuleCase;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 
 /**
@@ -9,8 +9,8 @@ import com.baomidou.mybatisplus.core.mapper.BaseMapper;
  * </p>
  *
  * @author 派同学
- * @since 2023-08-26
+ * @since 2023-08-27
  */
-public interface CaseItemMapper extends BaseMapper<CaseItem> {
+public interface ModuleCaseMapper extends BaseMapper<ModuleCase> {
 
 }

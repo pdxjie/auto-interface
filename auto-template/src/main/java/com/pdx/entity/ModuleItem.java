@@ -16,13 +16,13 @@ import lombok.EqualsAndHashCode;
  * </p>
  *
  * @author 派同学
- * @since 2023-08-26
+ * @since 2023-08-27
  */
 @Data
 @EqualsAndHashCode(callSuper = false)
-@TableName("auto_case_item")
-@ApiModel(value="CaseItem对象", description="")
-public class CaseItem implements Serializable {
+@TableName("auto_module_item")
+@ApiModel(value="ModuleItem对象", description="")
+public class ModuleItem implements Serializable {
 
     private static final long serialVersionUID=1L;
 
@@ -34,7 +34,7 @@ public class CaseItem implements Serializable {
     private String itemId;
 
     @ApiModelProperty(value = "用户ID")
-    private String caseId;
+    private String moduleId;
 
     @ApiModelProperty(value = "创建时间")
     private Date createTime;

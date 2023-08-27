@@ -1,6 +1,6 @@
 package com.pdx.service;
 
-import com.pdx.entity.CaseItem;
+import com.pdx.entity.ModuleCase;
 import com.baomidou.mybatisplus.extension.service.IService;
 
 /**
@@ -9,8 +9,8 @@ import com.baomidou.mybatisplus.extension.service.IService;
  * </p>
  *
  * @author 派同学
- * @since 2023-08-26
+ * @since 2023-08-27
  */
-public interface CaseItemService extends IService<CaseItem> {
+public interface ModuleCaseService extends IService<ModuleCase> {
 
 }
