@@ -1,25 +1,23 @@
 <template>
   <div class="auto-lab-info" style="margin-top: -20px">
     <div class="margin-t-16 card-layout">
+      <div class="margin-b-16">
+        <a-button type="primary" style="height: 40px" icon="plus">创建用例</a-button>
+        <a-button icon="upload" style="height: 40px;margin-left: 10px">导入</a-button>
+      </div>
       <a-card style="border-radius: 8px">
         <a-layout id="components-layout-demo-side" style="min-height: 100%;">
-          <a-layout-sider style="background: #fff;padding-right: 10px;border-right: 1px solid #eee;min-width: 220px">
+          <a-layout-sider style="background: #fff;padding-right: 10px;border-right: 1px solid #eee;min-width: 220px;position:relative;">
             <div class="margin-t-16">
               <!-- 选择项目 -->
               <div>
                 <span class="margin-r-10">项目:</span>
                 <a-select default-value="lucy" style="width: 130px" @change="handleChangeItem">
                   <a-select-option value="jack">
-                    Jack
+                    周计划优化
                   </a-select-option>
                   <a-select-option value="lucy">
-                    Lucy
-                  </a-select-option>
-                  <a-select-option value="disabled" disabled>
-                    Disabled
-                  </a-select-option>
-                  <a-select-option value="Yiminghe">
-                    yiminghe
+                    未读消息发送邮件服务
                   </a-select-option>
                 </a-select>
               </div>
@@ -36,11 +34,27 @@
                 </template>
               </a-directory-tree>
             </div>
+            <div class="bottom-operate display-flex position-absolute" style="bottom: 10px;left: 0px">
+              <a-button type="primary" icon="plus" shape="circle"></a-button>
+              <a-button type="danger" ghost icon="delete" class="margin-l-10" shape="circle"></a-button>
+            </div>
           </a-layout-sider>
           <a-layout>
             <a-layout-content style="background: #fff;padding-left: 10px">
-              <div class="margin-t-16">
-                Bill is a cat.
+              <div class="display-flex justify-between">
+                <div class="margin-t-16">
+                  <div class="font-size-18 font-w-500">全部用例（234）</div>
+                </div>
+                <div class="margin-t-16">
+                  <a-input ref="userNameInput" v-model="searchVal" placeholder="通过用例名称检索">
+                    <a-icon slot="prefix" type="search" />
+                  </a-input>
+                </div>
+              </div>
+              <!-- 用例列表 -->
+              <div class="margin-t-10">
+                <a-table :columns="caseColumns" :data-source="caseData">
+                </a-table>
               </div>
             </a-layout-content>
           </a-layout>
@@ -51,6 +65,8 @@
 </template>
 
 <script>
+import { caseColumns } from '@/views/mine'
+
 export default {
   name: 'AutoLabInfo',
   data () {
@@ -68,7 +84,10 @@ export default {
             }
           ]
         }
-      ]
+      ],
+      searchVal: '',
+      caseColumns,
+      caseData: []
     }
   },
   mounted () {
