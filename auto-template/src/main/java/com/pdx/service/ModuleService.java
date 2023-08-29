@@ -2,6 +2,7 @@ package com.pdx.service;
 
 import com.pdx.entity.Module;
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.pdx.response.Result;
 
 /**
  * <p>
@@ -13,4 +14,13 @@ import com.baomidou.mybatisplus.extension.service.IService;
  */
 public interface ModuleService extends IService<Module> {
 
+    Result<?> getModulesByItemId(String itemId);
+
+    Result<?> insertModule(Module module);
+
+    Result<?> updateModule(Module module);
+
+    Result<?> getModuleById(String id);
+
+    Result<?> removeModuleById(String id);
 }

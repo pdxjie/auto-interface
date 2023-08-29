@@ -1,5 +1,7 @@
 package com.pdx.constants;
 
+import java.util.UUID;
+
 /*
  * @Author 派同学
  * @Description 基础常量
@@ -27,21 +29,6 @@ public interface BasicConstants {
     // 默认简介
     public static final String DEFAULT_REMARK = "说些什么介绍一下自己吧~";
 
-    // 默认群聊房间
-    public static final String ROOM_ID = "roomId";
-
-    // 聊天室 标识KEY
-    public static final String ROOM_KEY = "chat-room::";
-
-    // 聊天室 用户KEY
-    public static final String ROOM_USERS = "room::users";
-
     // 内网IP
     public static final String DEFAULT_ADDRESS = "内网IP";
-
-    // 聊天记录标识
-    public static final String CHAT_KEY = "chat_key::";
-
-    // 八股标识
-    public static final String INTERVIEW_QUESTION_KEY = "interview_question_key::";
 }

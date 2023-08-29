@@ -1,12 +1,8 @@
 package com.pdx.service.impl;
 
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.pdx.entity.Item;
-import com.pdx.entity.User;
-import com.pdx.entity.UserItem;
-import com.pdx.mapper.ItemMapper;
-import com.pdx.mapper.UserItemMapper;
-import com.pdx.mapper.UserMapper;
+import com.pdx.entity.*;
+import com.pdx.mapper.*;
 import com.pdx.modal.dto.ItemDto;
 import com.pdx.modal.vo.QueryItemVo;
 import com.pdx.response.Result;
@@ -41,6 +37,12 @@ public class ItemServiceImpl extends ServiceImpl<ItemMapper, Item> implements It
 
     @Resource
     private JwtUtil jwtUtil;
+
+    @Resource
+    private ModuleItemMapper moduleItemMapper;
+
+    @Resource
+    private ModuleMapper moduleMapper;
 
     /**
      * 条件分页查询项目
@@ -100,6 +102,22 @@ public class ItemServiceImpl extends ServiceImpl<ItemMapper, Item> implements It
         userItem.setIdentity(1);
         userItem.setCreateTime(new Date());
         userItem.setUpdateTime(new Date());
+        // 默认创建一个公共模块
+        ModuleItem moduleItem = new ModuleItem();
+        moduleItem.setId(UUID.randomUUID().toString());
+        moduleItem.setItemId(itemId);
+        moduleItem.setModuleId(itemId);
+        moduleItem.setCreateTime(new Date());
+        moduleItem.setUpdateTime(new Date());
+        moduleItemMapper.insert(moduleItem);
+        // 创建一个模块
+        Module module = new Module();
+        module.setId(itemId);
+        module.setName("公共模块");
+        module.setParentId("0");
+        module.setCreateTime(new Date());
+        module.setUpdateTime(new Date());
+        moduleMapper.insert(module);
         int result = userItemMapper.insert(userItem);
         return (save && result > 0) ? Result.success() : Result.fail();
     }
