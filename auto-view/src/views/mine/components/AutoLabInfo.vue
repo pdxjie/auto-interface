@@ -35,8 +35,15 @@
               </a-directory-tree>
             </div>
             <div class="bottom-operate display-flex position-absolute" style="bottom: 10px;left: 0px">
-              <a-button type="primary" icon="plus" shape="circle"></a-button>
-              <a-button type="danger" ghost icon="delete" class="margin-l-10" shape="circle"></a-button>
+              <a-button @click="insertModule" type="primary" icon="plus" shape="circle"></a-button>
+              <a-button @click="updateModuleInfo" icon="edit" class="margin-l-10" shape="circle"></a-button>
+              <a-button
+                type="danger"
+                @click="removeModule"
+                ghost
+                icon="delete"
+                class="margin-l-10"
+                shape="circle"></a-button>
             </div>
           </a-layout-sider>
           <a-layout>
@@ -61,38 +68,37 @@
         </a-layout>
       </a-card>
     </div>
+    <!-- 添加或编辑模块 -->
+    <AddOrEditModule
+      ref="module"
+      :itemId="$route.query.id"
+      :currentParentId="currentParentId"
+      @operateResult="operateResult"
+      :type="type"
+      @updateFun="updateFun"/>
   </div>
 </template>
 
 <script>
 import { caseColumns } from '@/views/mine'
-import { getModuleList } from '@/api/module'
+import { deleteModule, getModuleList, moduleInfo, updateModule } from '@/api/module'
+import AddOrEditModule from '@/views/mine/components/AddOrEditModule'
 
 export default {
   name: 'AutoLabInfo',
+  components: { AddOrEditModule },
   data () {
     return {
-      treeData: [
-        {
-          title: '公共用例（3030）',
-          key: '0-0',
-          scopedSlots: { icon: 'custom' },
-          children: [
-            {
-              title: '公共用例1',
-              key: '0-1',
-              scopedSlots: { icon: 'custom' }
-            }
-          ]
-        }
-      ],
+      treeData: [],
       searchVal: '',
       caseColumns,
-      caseData: []
+      caseData: [],
+      currentParentId: '',
+      type: '',
+      currentModule: null
     }
   },
   mounted () {
-    console.log(this.$route.query.id)
     this.moduleListByItemId(this.$route.query.id)
   },
   created () {
@@ -100,16 +106,113 @@ export default {
   },
   methods: {
     async moduleListByItemId (itemId) {
-      const data = await getModuleList(itemId)
-      console.log(data)
+      const { data } = await getModuleList(itemId)
+      const tempData = []
+      data.forEach(item => {
+        const temp = {
+          children: this.dealChildren(item.children),
+          title: item.name,
+          key: item.id
+        }
+        tempData.push(temp)
+      })
+      this.treeData = tempData
+    },
+    dealChildren (children) {
+      let tempData = []
+      if (children && children.length > 0) {
+        children.forEach(item => {
+          const temp = {
+            children: this.dealChildren(item.children),
+            title: item.name,
+            key: item.id
+          }
+          tempData.push(temp)
+        })
+      } else {
+        tempData = children
+      }
+      return tempData
     },
     onSelect (keys, event) {
-      console.log('Trigger Select', keys, event)
+      this.currentParentId = keys[0]
     },
     onExpand () {
       console.log('Trigger Expand')
     },
-    handleChangeItem () {}
+    handleChangeItem () {},
+    insertModule () {
+      this.type = 'insert'
+      this.$refs.module.visible = true
+      this.$nextTick(() => {
+        this.$refs.module.form.setFieldsValue({
+          name: '',
+          sort: 0
+        })
+      })
+    },
+    operateResult (data) {
+      if (data.code === 200) {
+        this.$message.success('操作成功！')
+        this.moduleListByItemId(this.$route.query.id)
+        this.$refs.module.visible = false
+      } else {
+        this.$message.warning('操作失败！')
+        this.$refs.module.visible = false
+      }
+    },
+    removeModule () {
+      if (this.currentParentId === '') {
+        this.$message.warning('请选择模块！')
+        return
+      }
+      this.$confirm({
+        title: '确定要删除该模块吗?',
+        content: '删除该模块后，其下的用例将会自动移入公共模块中，请注意查收！',
+        okText: '确认',
+        okType: 'danger',
+        cancelText: '取消',
+        onOk: () => {
+          this.removeModuleById(this.currentParentId)
+        },
+        onCancel: () => {
+          this.$message.info('取消删除！')
+        }
+      })
+    },
+    removeModuleById () {
+      deleteModule(this.currentParentId).then(res => {
+        if (res.code === 200) {
+          this.$message.success('删除成功！')
+          this.moduleListByItemId(this.$route.query.id)
+        }
+      })
+    },
+    async updateModuleInfo () {
+      if (this.currentParentId === '') {
+        this.$message.warning('请选择模块！')
+        return
+      }
+      this.type = 'update'
+      const { data } = await moduleInfo(this.currentParentId)
+      this.currentModule = data
+      this.$refs.module.visible = true
+      this.$nextTick(() => {
+        this.$refs.module.form.setFieldsValue(data)
+      })
+    },
+    updateFun (data) {
+      console.log(data, 'data')
+      this.currentModule.name = data.name
+      this.currentModule.sort = data.sort
+      updateModule(this.currentModule).then(res => {
+        if (res.code === 200) {
+          this.$message.success('更新成功！')
+          this.moduleListByItemId(this.$route.query.id)
+          this.$refs.module.visible = false
+        }
+      })
+    }
   }
 }
 </script>
