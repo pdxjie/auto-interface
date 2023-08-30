@@ -2,6 +2,7 @@ package com.pdx.controller;
 
 
 import com.pdx.entity.Module;
+import com.pdx.modal.vo.ModuleVo;
 import com.pdx.response.Result;
 import com.pdx.service.ModuleService;
 import io.swagger.annotations.Api;
@@ -35,7 +36,7 @@ public class ModuleController {
 
     @ApiOperation(value = "创建模块, 只允许存在两级")
     @PostMapping("/insert")
-    public Result<?> insertModule (@RequestBody Module module) {
+    public Result<?> insertModule (@RequestBody ModuleVo module) {
         return moduleService.insertModule(module);
     }
 

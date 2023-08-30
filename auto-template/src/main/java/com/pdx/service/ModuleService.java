@@ -1,7 +1,8 @@
 package com.pdx.service;
 
-import com.pdx.entity.Module;
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.pdx.entity.Module;
+import com.pdx.modal.vo.ModuleVo;
 import com.pdx.response.Result;
 
 /**
@@ -16,7 +17,7 @@ public interface ModuleService extends IService<Module> {
 
     Result<?> getModulesByItemId(String itemId);
 
-    Result<?> insertModule(Module module);
+    Result<?> insertModule(ModuleVo module);
 
     Result<?> updateModule(Module module);
 

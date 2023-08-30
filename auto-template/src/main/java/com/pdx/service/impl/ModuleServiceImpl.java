@@ -3,6 +3,7 @@ package com.pdx.service.impl;
 import cn.hutool.core.util.StrUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
+import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.pdx.entity.Module;
 import com.pdx.entity.ModuleCase;
 import com.pdx.entity.ModuleItem;
@@ -10,16 +11,19 @@ import com.pdx.exception.BusinessException;
 import com.pdx.mapper.ModuleCaseMapper;
 import com.pdx.mapper.ModuleItemMapper;
 import com.pdx.mapper.ModuleMapper;
+import com.pdx.modal.vo.ModuleVo;
 import com.pdx.response.ResponseCode;
 import com.pdx.response.Result;
 import com.pdx.service.ModuleService;
-import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
 import java.util.Date;
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 /**
@@ -64,25 +68,41 @@ public class ModuleServiceImpl extends ServiceImpl<ModuleMapper, Module> impleme
     }
 
     @Override
-    public Result<?> insertModule(Module module) {
+    public Result<?> insertModule(ModuleVo moduleVo) {
+        Module parentModule = null;
+        if (StringUtils.isNotEmpty(moduleVo.getParentId()) && !"0".equals(moduleVo.getParentId())) {
+            parentModule = getById(moduleVo.getParentId());
+        }
         // 判断父模块是否为空
-        if (module.getParentId() == null) {
-            module.setParentId("0");
+        if (StrUtil.isEmpty(moduleVo.getParentId())) {
+            moduleVo.setParentId("0");
         }
         // 如果父模块不为空，则查询父模块的父模块的父级是否为0
-        Module parentModule = getById(module.getParentId());
-        if (!"0".equals(parentModule.getParentId())) {
+        if (null != parentModule && !"0".equals(parentModule.getParentId())) {
             throw new BusinessException(ResponseCode.ERROR_PARAM);
         }
         // 判断模块名称是否重复
         QueryWrapper<Module> wrapper = new QueryWrapper<>();
-        wrapper.eq("name", module.getName());
-        wrapper.eq("parent_id", module.getParentId());
+        wrapper.eq("name", moduleVo.getName());
+        wrapper.eq("parent_id", moduleVo.getParentId());
         if (baseMapper.selectCount(wrapper) > 0) {
             throw new BusinessException(ResponseCode.ERROR_PARAM);
         }
+        // 创建新的 Module 对象
+        Module module = new Module();
+        BeanUtils.copyProperties(moduleVo, module);
+        String moduleId = UUID.randomUUID().toString();
+        module.setId(moduleId);
         module.setCreateTime(new Date());
         module.setUpdateTime(new Date());
+        // 项目 和 模块 关联
+        ModuleItem moduleItem = new ModuleItem();
+        moduleItem.setId(UUID.randomUUID().toString());
+        moduleItem.setModuleId(moduleId);
+        moduleItem.setItemId(moduleVo.getItemId());
+        moduleItem.setCreateTime(new Date());
+        moduleItem.setUpdateTime(new Date());
+        moduleItemMapper.insert(moduleItem);
         // 保存数据
         boolean result = save(module);
         return result ? Result.success() : Result.fail();
@@ -112,13 +132,19 @@ public class ModuleServiceImpl extends ServiceImpl<ModuleMapper, Module> impleme
         ModuleItem moduleItem = moduleItemMapper.selectOne(new QueryWrapper<ModuleItem>().eq("module_id", id));
         // 2. 判断模块下的用例是否存在
         List<ModuleCase> moduleCases = moduleCaseMapper.selectList(new QueryWrapper<ModuleCase>().eq("module_id", id));
-        moduleCases.forEach(moduleCase -> {
-            UpdateWrapper<ModuleCase> wrapper = new UpdateWrapper<>();
-            wrapper.set("module_id", moduleItem.getItemId()).eq("id", moduleCase.getId());
-            moduleCaseMapper.update(moduleCase, wrapper);
-        });
-        int result = baseMapper.deleteById(id);
-        return result > 0 ? Result.success() : Result.fail();
+        // 如果用例为空，则直接删除即可
+        if (null == moduleCases || moduleCases.size() == 0) {
+            int result = baseMapper.deleteById(id);
+            return result > 0 ? Result.success() : Result.fail();
+        } else {
+            moduleCases.forEach(moduleCase -> {
+                UpdateWrapper<ModuleCase> wrapper = new UpdateWrapper<>();
+                wrapper.set("module_id", moduleItem.getItemId()).eq("id", moduleCase.getId());
+                moduleCaseMapper.update(moduleCase, wrapper);
+            });
+            int result = baseMapper.deleteById(id);
+            return result > 0 ? Result.success() : Result.fail();
+        }
     }
 
     /**
