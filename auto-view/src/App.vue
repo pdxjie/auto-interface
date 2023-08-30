@@ -1,7 +1,7 @@
 <template>
   <a-locale-provider :locale="locale">
     <div id="app">
-      <router-view/>
+      <router-view :key="$route.fullPath"/>
     </div>
   </a-locale-provider>
 </template>

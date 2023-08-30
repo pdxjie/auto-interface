@@ -66,6 +66,7 @@
 
 <script>
 import { caseColumns } from '@/views/mine'
+import { getModuleList } from '@/api/module'
 
 export default {
   name: 'AutoLabInfo',
@@ -92,8 +93,16 @@ export default {
   },
   mounted () {
     console.log(this.$route.query.id)
+    this.moduleListByItemId(this.$route.query.id)
+  },
+  created () {
+    this.moduleListByItemId(this.$route.query.id)
   },
   methods: {
+    async moduleListByItemId (itemId) {
+      const data = await getModuleList(itemId)
+      console.log(data)
+    },
     onSelect (keys, event) {
       console.log('Trigger Select', keys, event)
     },

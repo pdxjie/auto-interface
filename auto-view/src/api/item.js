@@ -2,7 +2,6 @@
  * 项目相关接口
  */
 import { axios } from '@/utils/request'
-import { METHOD_TYPE } from '@/utils/constants'
 
 /**
  * 条件分页查询
@@ -12,7 +11,7 @@ import { METHOD_TYPE } from '@/utils/constants'
 export const homePages = (vo) => {
   return axios({
     url: '/pdx/item/homePages',
-    method: METHOD_TYPE.POST,
+    method: 'POST',
     data: vo
   })
 }
@@ -25,7 +24,7 @@ export const homePages = (vo) => {
 export const insertItem = (item) => {
   return axios({
     url: '/pdx/item/insert',
-    method: METHOD_TYPE.POST,
+    method: 'POST',
     data: item
   })
 }
@@ -38,7 +37,7 @@ export const insertItem = (item) => {
 export const updateItem = (item) => {
   return axios({
     url: '/pdx/item/update',
-    method: METHOD_TYPE.POST,
+    method: 'POST',
     data: item
   })
 }
@@ -51,7 +50,7 @@ export const updateItem = (item) => {
 export const itemInfo = (id) => {
   return axios({
     url: '/pdx/item/' + id,
-    method: METHOD_TYPE.GET
+    method: 'GET'
   })
 }
 
@@ -63,6 +62,6 @@ export const itemInfo = (id) => {
 export const removeItemById = (id) => {
   return axios({
     url: '/pdx/item/remove/' + id,
-    method: METHOD_TYPE.DELETE
+    method: 'DELETE'
   })
 }

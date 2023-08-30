@@ -59,7 +59,7 @@ export const asyncRouterMap = [
           {
             path: '/mine/card',
             name: 'MineCard',
-            component: () => import('@/views/mine/index'),
+            component: () => import('@/views/mine/index.vue'),
             meta: { title: '我的项目' }
           }
         ]
@@ -67,7 +67,7 @@ export const asyncRouterMap = [
       {
         path: '/auto',
         name: 'Auto',
-        component: () => import('@/views/mine/components/AutoLabInfo'),
+        component: () => import('@/views/mine/components/AutoLabInfo.vue'),
         hidden: true,
         meta: { title: '自动化测试' }
       },
