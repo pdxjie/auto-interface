@@ -28,6 +28,7 @@ import TagSelect from '@/components/TagSelect'
 import ExceptionPage from '@/components/Exception'
 import StandardFormRow from '@/components/StandardFormRow'
 import ArticleListContent from '@/components/ArticleListContent'
+import MonacoEditor from '@/components/MonacoEditor/index'
 
 export {
   AvatarList,
@@ -58,5 +59,6 @@ export {
   IconSelector,
   TagSelect,
   StandardFormRow,
-  ArticleListContent
+  ArticleListContent,
+  MonacoEditor
 }

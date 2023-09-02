@@ -1,5 +1,6 @@
 const path = require('path')
 const webpack = require('webpack')
+const MonacoEditorWebpackPlugin = require('monaco-editor-webpack-plugin')
 
 function resolve (dir) {
   return path.join(__dirname, dir)
@@ -39,6 +40,11 @@ module.exports = {
       .options({
         name: 'assets/[name].[hash:8].[ext]'
       })
+    config.plugin('monaco-editor').use(MonacoEditorWebpackPlugin, [
+      {
+        languages: ['sql', 'java', 'javascript', 'json']
+      }
+    ])
     /* svgRule.oneOf('inline')
       .resourceQuery(/inline/)
       .use('vue-svg-loader')

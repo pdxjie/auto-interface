@@ -2,7 +2,7 @@
   <div class="auto-lab-info" style="margin-top: -20px">
     <div class="margin-t-16 card-layout">
       <div class="margin-b-16">
-        <a-button type="primary" style="height: 40px" icon="plus">创建用例</a-button>
+        <a-button @click="insertCase" type="primary" style="height: 40px" icon="plus">创建用例</a-button>
         <a-button icon="upload" style="height: 40px;margin-left: 10px">导入</a-button>
       </div>
       <a-card style="border-radius: 8px">
@@ -60,7 +60,11 @@
               </div>
               <!-- 用例列表 -->
               <div class="margin-t-10">
-                <a-table :columns="caseColumns" :data-source="caseData">
+                <a-table
+                  :loading="loading"
+                  :columns="caseColumns"
+                  :data-source="caseData"
+                  :pagination="pagination">
                 </a-table>
               </div>
             </a-layout-content>
@@ -76,6 +80,11 @@
       @operateResult="operateResult"
       :type="type"
       @updateFun="updateFun"/>
+    <!-- 添加或修改用例 -->
+    <InsertOrUpdateCase
+      ref="case"
+      @insertFun="insertFun"
+      :type="type"/>
   </div>
 </template>
 
@@ -83,19 +92,36 @@
 import { caseColumns } from '@/views/mine'
 import { deleteModule, getModuleList, moduleInfo, updateModule } from '@/api/module'
 import AddOrEditModule from '@/views/mine/components/AddOrEditModule'
+import InsertOrUpdateCase from '@/views/mine/components/InsertOrUpdateCase'
+import { casePage } from '@/api/case'
 
 export default {
   name: 'AutoLabInfo',
-  components: { AddOrEditModule },
+  components: { InsertOrUpdateCase, AddOrEditModule },
   data () {
     return {
       treeData: [],
-      searchVal: '',
+      queryCaseVo: {
+        name: '',
+        current: 1,
+        pageSize: 10
+      },
+      // 分页参数
+      pagination: {
+        size: 'large',
+        current: 1,
+        pageSize: 10,
+        total: 0,
+        showTotal: (total, range) => {
+          return ' 共' + total + '条'
+        }
+      },
       caseColumns,
       caseData: [],
       currentParentId: '',
       type: '',
-      currentModule: null
+      currentModule: null,
+      loading: false
     }
   },
   mounted () {
@@ -105,6 +131,21 @@ export default {
     this.moduleListByItemId(this.$route.query.id)
   },
   methods: {
+    // 表格改变时触发
+    handleTableChange (pagination, filters, sorter) {
+      this.pagination = pagination
+      this.queryCaseVo.current = pagination.current
+      this.queryCaseVo.pageSize = pagination.pageSize
+      this.searchOperate()
+    },
+    // 搜索操作
+    async searchOperate () {
+      this.loading = true
+      const { data } = await casePage(this.queryCaseVo)
+      this.caseData = data.cases
+      this.pagination.total = data.total
+      this.loading = false
+    },
     async moduleListByItemId (itemId) {
       const { data } = await getModuleList(itemId)
       const tempData = []
@@ -134,8 +175,10 @@ export default {
       }
       return tempData
     },
-    onSelect (keys, event) {
+    async onSelect (keys, event) {
       this.currentParentId = keys[0]
+      const { data } = await moduleInfo(this.currentParentId)
+      this.currentModule = data
     },
     onExpand () {
       console.log('Trigger Expand')
@@ -212,6 +255,28 @@ export default {
           this.$refs.module.visible = false
         }
       })
+    },
+    // 新增回调函数
+    insertFun (data) {
+      if (data.code === 200) {
+        this.$message.success('操作成功！')
+        // TODO 刷新用例列表
+      }
+    },
+    insertCase () {
+      // 如果没有选择模块，则不允许添加用例
+      if (this.currentParentId === '') {
+        this.$message.warning('请选择模块！')
+        return
+      }
+      // 如果选择非公共模块 且是一级目录 则不允许添加用例
+      console.log(this.currentModule, 'currentModule')
+      if (this.currentParentId !== this.$route.query.id && this.currentModule.parentId === '0') {
+        this.$message.warning('非公共模块下, 请在该模块下添加子集模块后再创建用例！')
+        return
+      }
+      this.type = 'insert'
+      this.$refs.case.visible = true
     }
   }
 }
