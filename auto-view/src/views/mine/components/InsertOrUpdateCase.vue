@@ -30,15 +30,10 @@
           <a-col :span="24">
             <a-form-item label="请求地址">
               <a-input
-                v-decorator="[
-                  'requestUrl',
-                  {
-                    rules: [{ required: true, message: '请输入请求地址！' }],
-                  },
-                ]"
-                placeholder="请描述请求地址"
+                v-model="caseVo.requestUrl"
+                placeholder="请输入请求地址"
               >
-                <a-select slot="addonBefore" default-value="GET" style="width: 90px">
+                <a-select slot="addonBefore" @change="changeRequestType" v-model="caseVo.requestType" style="width: 90px">
                   <a-select-option value="get">
                     GET
                   </a-select-option>
@@ -49,13 +44,35 @@
               </a-input>
               <a-tabs default-active-key="1" @change="callback">
                 <a-tab-pane key="1" tab="Params">
-                  Content of Tab Pane 1
+                  <a-table :columns="ParamsColumns" :data-source="paramsData" :pagination="false">
+                    <template slot="paramsKey" slot-scope="text, record">
+                      <a-input style="height: 30px" v-model="record.paramsKey" placeholder="请输入参数名"/>
+                    </template>
+                    <template slot="paramsVal" slot-scope="text, record">
+                      <div class="display-flex align-items">
+                        <a-input style="height: 30px" v-model="record.paramsVal" placeholder="请输入参数名"/>
+                        <a-icon v-if="record.id === paramsData.length" @click="addParams" style="margin-left: 5px;cursor: pointer" type="plus"></a-icon>
+                        <a-icon v-if="record.id !== paramsData.length" @click="removeParams(record)" style="margin-left: 5px;cursor: pointer;color: #cf1322" type="minus"></a-icon>
+                      </div>
+                    </template>
+                  </a-table>
                 </a-tab-pane>
                 <a-tab-pane key="2" tab="Body">
                   <MonacoEditor ref="initRequestData" height="400px" language="json" :code="initJson"/>
                 </a-tab-pane>
                 <a-tab-pane key="3" tab="Header">
-                  Content of Tab Pane 3
+                  <a-table :columns="ParamsColumns" :data-source="paramsData" :pagination="false">
+                    <template slot="paramsKey" slot-scope="text, record">
+                      <a-input style="height: 30px" v-model="record.paramsKey" placeholder="请输入参数名"/>
+                    </template>
+                    <template slot="paramsVal" slot-scope="text, record">
+                      <div class="display-flex align-items">
+                        <a-input style="height: 30px" v-model="record.paramsVal" placeholder="请输入参数名"/>
+                        <a-icon v-if="record.id === paramsData.length" @click="addHeaders" style="margin-left: 5px;cursor: pointer" type="plus"></a-icon>
+                        <a-icon v-if="record.id !== paramsData.length" @click="removeHeaders(record)" style="margin-left: 5px;cursor: pointer;color: #cf1322" type="minus"></a-icon>
+                      </div>
+                    </template>
+                  </a-table>
                 </a-tab-pane>
               </a-tabs>
             </a-form-item>
@@ -89,13 +106,6 @@
                 mode="editable"
                 placeholder="点击右上角全屏，编写体验效果更佳"
                 height="300px"></v-md-editor>
-            </a-form-item>
-          </a-col>
-        </a-row>
-        <a-row :gutter="16">
-          <a-col :span="24" v-if="isPost">
-            <a-form-item label="请求数据">
-              <MonacoEditor ref="initRequestData" height="400px" language="json" :code="initJson"/>
             </a-form-item>
           </a-col>
         </a-row>
@@ -158,11 +168,39 @@ export default {
       form: this.$form.createForm(this),
       visible: false,
       caseVo: {
-        caseRank: 1
+        caseRank: 1,
+        requestUrl: '',
+        requestType: 'get'
       },
       initJson: '',
       initResponse: '',
-      isPost: true
+      isPost: true,
+      ParamsColumns: [
+        {
+          title: '参数名',
+          dataIndex: 'paramsKey',
+          scopedSlots: { customRender: 'paramsKey' }
+        },
+        {
+          title: '参数值',
+          dataIndex: 'paramsVal',
+          scopedSlots: { customRender: 'paramsVal' }
+        }
+      ],
+      paramsData: [
+        {
+          id: 1,
+          paramsKey: '',
+          paramsVal: ''
+        }
+      ],
+      headersParams: [
+        {
+          id: 1,
+          paramsKey: '',
+          paramsVal: ''
+        }
+      ]
     }
   },
   computed: {
@@ -185,11 +223,18 @@ export default {
     submitCaseInfo () {
       this.form.validateFields((err, values) => {
         if (!err) {
+          if (this.paramsData.length === 1 && this.paramsData[0].paramsKey.trim() === '' && this.caseVo.requestType === 'get') {
+            this.$message.error('请求方式为 GET 时，参数不能为空！')
+            return
+          }
+          if (this.$refs.initRequestData.codeVal.trim() === '' && this.caseVo.requestType === 'post') {
+            this.$message.error('请求方式为 POST 时，请求体不能为空！')
+            return
+          }
           // 解构赋值
-          const { name, requestUrl } = values
+          const { name } = values
           // 封装数据
           this.caseVo.name = name
-          this.caseVo.requestUrl = requestUrl
           this.caseVo.requestData = this.$refs.initRequestData.codeVal
           this.caseVo.expectResponse = this.$refs.responseData.codeVal
           this.caseVo.moduleId = this.currentModule.id
@@ -208,9 +253,77 @@ export default {
         }
       })
     },
-    changeRequestType (e) {
-      this.isPost = e.target.checked
-      console.log(this.isPost)
+    // 添加参数
+    addParams () {
+      if (this.caseVo.requestUrl.trim() === '') {
+        this.$message.warning('接口请求地址不能为空！')
+        return
+      }
+      const index = this.paramsData.length
+      const param = {
+        id: index + 1,
+        paramsKey: '',
+        paramsVal: ''
+      }
+      this.paramsData.push(param)
+    },
+    // 删除参数
+    removeParams (param) {
+      // 如果删除的是最后一个，直接删除
+      if (param.id === this.paramsData.length) {
+        this.paramsData = this.paramsData.filter(item => {
+          return item.id !== param.id
+        })
+      } else {
+        // 如果删除的不是最后一个，需要重新排序
+        const index = param.id
+        this.paramsData = this.paramsData.filter(item => {
+          return item.id !== param.id
+        })
+        this.paramsData.forEach(item => {
+          if (item.id > index) {
+            this.$set(item, 'id', item.id - 1)
+          }
+        })
+      }
+    },
+    // 添加参数
+    addHeaders () {
+      if (this.caseVo.requestUrl.trim() === '') {
+        this.$message.warning('接口请求地址不能为空！')
+        return
+      }
+      const index = this.paramsData.length
+      const param = {
+        id: index + 1,
+        paramsKey: '',
+        paramsVal: ''
+      }
+      this.headersParams.push(param)
+    },
+    // 删除参数
+    removeHeaders (param) {
+      // 如果删除的是最后一个，直接删除
+      if (param.id === this.headersParams.length) {
+        this.headersParams = this.headersParams.filter(item => {
+          return item.id !== param.id
+        })
+      } else {
+        // 如果删除的不是最后一个，需要重新排序
+        const index = param.id
+        this.headersParams = this.headersParams.filter(item => {
+          return item.id !== param.id
+        })
+        this.headersParams.forEach(item => {
+          if (item.id > index) {
+            this.$set(item, 'id', item.id - 1)
+          }
+        })
+      }
+    },
+    callback () {},
+    changeRequestType (val) {
+      this.caseVo.requestType = val
     }
   }
 }
