@@ -1,6 +1,7 @@
 package com.pdx.service.impl;
 
 import cn.hutool.core.util.StrUtil;
+import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.pdx.entity.ModuleCase;
@@ -14,6 +15,7 @@ import com.pdx.modal.vo.CaseQueryVo;
 import com.pdx.response.ResponseCode;
 import com.pdx.response.Result;
 import com.pdx.service.TestCaseService;
+import com.pdx.utils.HttpUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
@@ -93,5 +95,28 @@ public class TestCaseServiceImpl extends ServiceImpl<TestCaseMapper, TestCase> i
         int result = moduleCaseMapper.delete(new QueryWrapper<ModuleCase>().eq("case_id", id));
         int row = baseMapper.deleteById(id);
         return (result > 0 && row > 0) ? Result.success() : Result.fail();
+    }
+
+    /**
+     * 执行用例
+     * @param caseInfo
+     */
+    @Override
+    public Result<?> runCase(TestCase caseInfo) {
+        JSONObject requestData = JSONObject.parseObject(caseInfo.getRequestData());
+        JSONObject expectData = JSONObject.parseObject(caseInfo.getExpectResponse());
+        JSONObject resultJson = HttpUtils.postJson(caseInfo.getRequestUrl(), requestData);
+        boolean success = HttpUtils.isSuccess(expectData, resultJson);
+        // 如果返回 true 更新用例执行结果
+        if (success) {
+            caseInfo.setStatus(3);
+            caseInfo.setUpdateTime(new Date());
+            baseMapper.updateById(caseInfo);
+        } else {
+            caseInfo.setStatus(4);
+            caseInfo.setUpdateTime(new Date());
+            baseMapper.updateById(caseInfo);
+        }
+        return Result.success(success);
     }
 }

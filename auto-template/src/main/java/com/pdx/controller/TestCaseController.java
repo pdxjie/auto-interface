@@ -54,5 +54,11 @@ public class TestCaseController {
     public Result<?> removeCaseById (@PathVariable("id") String id) {
         return testCaseService.removeCaseInfoById(id);
     }
+
+    @ApiOperation(value = "执行用例")
+    @PostMapping("/run")
+    public Result<?> runCase (@RequestBody TestCase caseInfo) {
+        return testCaseService.runCase(caseInfo);
+    }
 }
 

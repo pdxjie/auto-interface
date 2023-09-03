@@ -25,4 +25,6 @@ public interface TestCaseService extends IService<TestCase> {
     Result<?> caseInfo(String id);
 
     Result<?> removeCaseInfoById(String id);
+
+    Result<?> runCase(TestCase caseInfo);
 }

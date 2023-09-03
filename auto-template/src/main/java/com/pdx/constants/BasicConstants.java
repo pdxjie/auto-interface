@@ -1,7 +1,5 @@
 package com.pdx.constants;
 
-import java.util.UUID;
-
 /*
  * @Author 派同学
  * @Description 基础常量
@@ -31,4 +29,7 @@ public interface BasicConstants {
 
     // 内网IP
     public static final String DEFAULT_ADDRESS = "内网IP";
+
+    // 成功返回响应值
+    public static final String SUCCESS_CODE = "200";
 }
