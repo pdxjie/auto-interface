@@ -3,10 +3,7 @@ package com.pdx.config;
 import com.baomidou.mybatisplus.annotation.DbType;
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.generator.AutoGenerator;
-import com.baomidou.mybatisplus.generator.config.DataSourceConfig;
-import com.baomidou.mybatisplus.generator.config.GlobalConfig;
-import com.baomidou.mybatisplus.generator.config.PackageConfig;
-import com.baomidou.mybatisplus.generator.config.StrategyConfig;
+import com.baomidou.mybatisplus.generator.config.*;
 import com.baomidou.mybatisplus.generator.config.rules.DateType;
 import com.baomidou.mybatisplus.generator.config.rules.NamingStrategy;
 
@@ -54,10 +51,15 @@ public class Generator {
         pc.setMapper("mapper");
         mpg.setPackageInfo(pc);
 
+        TemplateConfig templateConfig = new TemplateConfig();
+        templateConfig.setController("templates/controller.java.vm");
+
+        mpg.setTemplate(templateConfig);
+
         // 5、策略配置
         StrategyConfig strategy = new StrategyConfig();
         //strategy.setInclude("ks_\\w*");设置要映射的表名
-        strategy.setInclude("auto_module", "auto_module_case", "auto_module_item");
+        strategy.setInclude("demo");
         strategy.setNaming(NamingStrategy.underline_to_camel);//数据库表映射到实体的命名策略
         strategy.setTablePrefix("auto_");//设置表前缀不生成
 

@@ -2,4 +2,29 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.pdx.mapper.TestCaseMapper">
 
+    <select id="queryCasePage" resultType="com.pdx.modal.dto.CaseDto">
+        SELECT
+            ac.*,
+            am.name as moduleName
+        FROM auto_test_case ac
+                 LEFT JOIN auto_module_case amc on ac.id = amc.case_id
+                 LEFT JOIN auto_module am on am.id = amc.module_id
+        WHERE module_id = #{moduleId}
+        <if test="caseName != null and caseName != ''">
+            AND ac.name like #{caseName}
+        </if>
+        ORDER BY ac.create_time
+            limit #{size} offset #{startPage}
+    </select>
+    <select id="queryCount" resultType="java.lang.Integer">
+        SELECT
+            COUNT(*)
+        FROM auto_test_case ac
+        LEFT JOIN auto_module_case amc on ac.id = amc.case_id
+        LEFT JOIN auto_module am on am.id = amc.module_id
+        WHERE module_id = #{moduleId}
+        <if test="caseName != null and caseName != ''">
+            AND ac.name like #{caseName}
+        </if>
+    </select>
 </mapper>

@@ -58,7 +58,7 @@ public class RestExceptionHandler {
     }
 
     @ExceptionHandler(RuntimeException.class)
-    public Result runtimeExceptionHandler (RuntimeException e) {
+    public Result<?> runtimeExceptionHandler (RuntimeException e) {
         return Result.fail(ResponseCode.FAIL.getCode(), ResponseCode.FAIL.getMessage());
     }
 }

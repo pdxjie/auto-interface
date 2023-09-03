@@ -9,6 +9,7 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 
 import java.io.Serializable;
+import java.util.Date;
 
 /**
  * <p>
@@ -46,6 +47,14 @@ public class TestCase implements Serializable {
     private String expectResponse;
 
     @ApiModelProperty(value = "用例等级")
-    private Integer rank;
+    private Integer caseRank;
 
+    @ApiModelProperty(value = "运行状态")
+    private Integer status;
+
+    @ApiModelProperty(value = "创建时间")
+    private Date createTime;
+
+    @ApiModelProperty(value = "更新时间")
+    private Date updateTime;
 }
