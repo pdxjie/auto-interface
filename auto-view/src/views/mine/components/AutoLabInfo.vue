@@ -120,6 +120,8 @@
       @insertFun="insertFun"
       :currentModule="currentModule"
       :type="type"/>
+
+    <PreviewBusinessDesc ref="preview"/>
   </div>
 </template>
 
@@ -129,10 +131,11 @@ import { deleteModule, getModuleList, moduleInfo, updateModule } from '@/api/mod
 import AddOrEditModule from '@/views/mine/components/AddOrEditModule'
 import InsertOrUpdateCase from '@/views/mine/components/InsertOrUpdateCase'
 import { caseDelete, casePage } from '@/api/case'
+import PreviewBusinessDesc from '@/views/mine/components/PreviewBusinessDesc.vue'
 
 export default {
   name: 'AutoLabInfo',
-  components: { InsertOrUpdateCase, AddOrEditModule },
+  components: { PreviewBusinessDesc, InsertOrUpdateCase, AddOrEditModule },
   data () {
     return {
       treeData: [],
@@ -319,6 +322,8 @@ export default {
     },
     // 预览业务描述
     previewDesc (desc) {
+      this.$refs.preview.visible = true
+      this.$refs.preview.businessDesc = desc
     },
     onSelectChange (selectedRowKeys) {
       console.log('selectedRowKeys changed: ', selectedRowKeys)
