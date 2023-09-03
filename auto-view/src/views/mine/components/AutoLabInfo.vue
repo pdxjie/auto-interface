@@ -62,6 +62,7 @@
               <div class="margin-t-10">
                 <a-table
                   :loading="loading"
+                  :row-key="record => record.id"
                   :row-selection="{ selectedRowKeys: selectedRowKeys, onChange: onSelectChange }"
                   :columns="caseColumns"
                   :data-source="caseData"
@@ -76,10 +77,13 @@
                   </template>
                   <template slot="status" slot-scope="text, record">
                     <a v-if="record.status === 1" style="color: #2eabff">未执行</a>
+                    <a v-if="record.status === 2" >执行中</a>
+                    <a v-if="record.status === 3" style="color: #52c41a">成功</a>
+                    <a v-if="record.status === 4" style="color: #cf1322">失败</a>
                   </template>
                   <template slot="action" slot-scope="text, record">
                     <div class="display-flex align-items justify-content">
-                      <a-icon v-if="record.status === 1" style="font-size: 20px;cursor: pointer" type="play-circle" />
+                      <a-icon @click="runCase(record)" v-if="record.status !== 2" style="font-size: 20px;cursor: pointer" type="play-circle" />
                       <a-icon v-if="record.status === 2" style="font-size: 20px;cursor: pointer" type="pause-circle" />
                       <a-dropdown style="margin-left: 10px;margin-top: -8px" :trigger="['click']">
                         <a class="ant-dropdown-link" @click="e => e.preventDefault()">
@@ -130,7 +134,7 @@ import { caseColumns } from '@/views/mine'
 import { deleteModule, getModuleList, moduleInfo, updateModule } from '@/api/module'
 import AddOrEditModule from '@/views/mine/components/AddOrEditModule'
 import InsertOrUpdateCase from '@/views/mine/components/InsertOrUpdateCase'
-import { caseDelete, casePage } from '@/api/case'
+import { caseDelete, casePage, caseRun } from '@/api/case'
 import PreviewBusinessDesc from '@/views/mine/components/PreviewBusinessDesc.vue'
 
 export default {
@@ -363,6 +367,20 @@ export default {
         this.$refs.case.initResponse = caseInfo.expectResponse
         this.$refs.case.caseVo.description = caseInfo.businessDesc
       })
+    },
+    // 执行用例
+    async runCase (caseInfo) {
+      this.$set(caseInfo, 'status', 2)
+      const data = await caseRun(caseInfo)
+      if (data.code === 200 && data.data) {
+        setTimeout(() => {
+          this.$set(caseInfo, 'status', 3)
+        }, 2000)
+      } else if (data.code === 200 && !data.data) {
+        setTimeout(() => {
+          this.$set(caseInfo, 'status', 4)
+        }, 2000)
+      }
     }
   }
 }

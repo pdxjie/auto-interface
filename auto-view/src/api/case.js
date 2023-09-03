@@ -46,3 +46,12 @@ export const caseDelete = (id) => {
     method: METHOD_TYPE.DELETE
   })
 }
+
+// 执行用例
+export const caseRun = (caseInfo) => {
+  return axios({
+    url: '/case/run',
+    method: METHOD_TYPE.POST,
+    data: caseInfo
+  })
+}

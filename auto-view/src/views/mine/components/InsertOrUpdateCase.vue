@@ -5,14 +5,14 @@
       title="输入用例信息"
       :closable="false"
       :visible="visible"
-      width="40%"
+      width="50%"
       :body-style="{ paddingBottom: '80px' }"
       :after-visible-change="afterVisibleChange"
       @close="onClose"
     >
       <a-form :form="form" layout="vertical" hide-required-mark>
         <a-row :gutter="16">
-          <a-col :span="12">
+          <a-col :span="24">
             <a-form-item label="用例名称">
               <a-input
                 v-decorator="[
@@ -25,7 +25,9 @@
               />
             </a-form-item>
           </a-col>
-          <a-col :span="12">
+        </a-row>
+        <a-row :gutter="16">
+          <a-col :span="24">
             <a-form-item label="请求地址">
               <a-input
                 v-decorator="[
@@ -35,7 +37,27 @@
                   },
                 ]"
                 placeholder="请描述请求地址"
-              />
+              >
+                <a-select slot="addonBefore" default-value="GET" style="width: 90px">
+                  <a-select-option value="get">
+                    GET
+                  </a-select-option>
+                  <a-select-option value="post">
+                    POST
+                  </a-select-option>
+                </a-select>
+              </a-input>
+              <a-tabs default-active-key="1" @change="callback">
+                <a-tab-pane key="1" tab="Params">
+                  Content of Tab Pane 1
+                </a-tab-pane>
+                <a-tab-pane key="2" tab="Body">
+                  <MonacoEditor ref="initRequestData" height="400px" language="json" :code="initJson"/>
+                </a-tab-pane>
+                <a-tab-pane key="3" tab="Header">
+                  Content of Tab Pane 3
+                </a-tab-pane>
+              </a-tabs>
             </a-form-item>
           </a-col>
         </a-row>
@@ -71,7 +93,7 @@
           </a-col>
         </a-row>
         <a-row :gutter="16">
-          <a-col :span="24">
+          <a-col :span="24" v-if="isPost">
             <a-form-item label="请求数据">
               <MonacoEditor ref="initRequestData" height="400px" language="json" :code="initJson"/>
             </a-form-item>
@@ -139,7 +161,8 @@ export default {
         caseRank: 1
       },
       initJson: '',
-      initResponse: ''
+      initResponse: '',
+      isPost: true
     }
   },
   computed: {
@@ -184,6 +207,10 @@ export default {
           }
         }
       })
+    },
+    changeRequestType (e) {
+      this.isPost = e.target.checked
+      console.log(this.isPost)
     }
   }
 }
