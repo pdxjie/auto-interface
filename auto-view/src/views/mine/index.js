@@ -6,32 +6,36 @@ export const caseColumns = [
   {
     title: '用例名称',
     dataIndex: 'name',
+    align: 'center',
     ellipsis: true
   },
   {
     title: '所属模块',
-    dataIndex: 'module'
+    dataIndex: 'moduleName',
+    align: 'center'
   },
   {
     title: '用例等级',
-    dataIndex: 'rank',
-    scopedSlots: { customRender: 'rank' }
+    dataIndex: 'caseRank',
+    scopedSlots: { customRender: 'caseRank' },
+    align: 'center'
   },
   {
-    title: '用例描述',
-    dataIndex: 'description',
-    ellipsis: true
+    title: '业务场景描述',
+    dataIndex: 'businessDesc',
+    scopedSlots: { customRender: 'businessDesc' },
+    align: 'center'
   },
   {
     title: '用例状态',
     dataIndex: 'status',
-    ellipsis: true
+    scopedSlots: { customRender: 'status' },
+    align: 'center'
   },
   {
     title: '操作',
     dataIndex: 'action',
-    width: '20%',
-    fixed: 'right',
-    scopedSlots: { customRender: 'action' }
+    scopedSlots: { customRender: 'action' },
+    align: 'center'
   }
 ]

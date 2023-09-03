@@ -53,7 +53,7 @@
                   <div class="font-size-18 font-w-500">全部用例（234）</div>
                 </div>
                 <div class="margin-t-16">
-                  <a-input ref="userNameInput" v-model="searchVal" placeholder="通过用例名称检索">
+                  <a-input ref="userNameInput" v-model="queryCaseVo.name" placeholder="通过用例名称检索">
                     <a-icon slot="prefix" type="search" />
                   </a-input>
                 </div>
@@ -62,9 +62,43 @@
               <div class="margin-t-10">
                 <a-table
                   :loading="loading"
+                  :row-selection="{ selectedRowKeys: selectedRowKeys, onChange: onSelectChange }"
                   :columns="caseColumns"
                   :data-source="caseData"
                   :pagination="pagination">
+                  <template slot="caseRank" slot-scope="text, record">
+                    <a-tag color="red" v-if="record.caseRank === 1">P0</a-tag>
+                    <a-tag color="orange" v-if="record.caseRank === 2">P1</a-tag>
+                    <a-tag v-if="record.caseRank === 3">P2</a-tag>
+                  </template>
+                  <template slot="businessDesc" slot-scope="text, record">
+                    <a @click="previewDesc(record.businessDesc)" style="color: #2eabff">预览</a>
+                  </template>
+                  <template slot="status" slot-scope="text, record">
+                    <a v-if="record.status === 1" style="color: #2eabff">未执行</a>
+                  </template>
+                  <template slot="action" slot-scope="text, record">
+                    <div class="display-flex align-items justify-content">
+                      <a-icon v-if="record.status === 1" style="font-size: 20px;cursor: pointer" type="play-circle" />
+                      <a-icon v-if="record.status === 2" style="font-size: 20px;cursor: pointer" type="pause-circle" />
+                      <a-dropdown style="margin-left: 10px;margin-top: -8px" :trigger="['click']">
+                        <a class="ant-dropdown-link" @click="e => e.preventDefault()">
+                          ...
+                        </a>
+                        <a-menu slot="overlay">
+                          <a-menu-item>
+                            <a href="javascript:;">执行详情</a>
+                          </a-menu-item>
+                          <a-menu-item>
+                            <a @click="updateCaseInfo(record)">编辑用例</a>
+                          </a-menu-item>
+                          <a-menu-item>
+                            <a @click="removeCaseInfo(record.id)">移除用例</a>
+                          </a-menu-item>
+                        </a-menu>
+                      </a-dropdown>
+                    </div>
+                  </template>
                 </a-table>
               </div>
             </a-layout-content>
@@ -84,6 +118,7 @@
     <InsertOrUpdateCase
       ref="case"
       @insertFun="insertFun"
+      :currentModule="currentModule"
       :type="type"/>
   </div>
 </template>
@@ -93,7 +128,7 @@ import { caseColumns } from '@/views/mine'
 import { deleteModule, getModuleList, moduleInfo, updateModule } from '@/api/module'
 import AddOrEditModule from '@/views/mine/components/AddOrEditModule'
 import InsertOrUpdateCase from '@/views/mine/components/InsertOrUpdateCase'
-import { casePage } from '@/api/case'
+import { caseDelete, casePage } from '@/api/case'
 
 export default {
   name: 'AutoLabInfo',
@@ -121,7 +156,8 @@ export default {
       currentParentId: '',
       type: '',
       currentModule: null,
-      loading: false
+      loading: false,
+      selectedRowKeys: []
     }
   },
   mounted () {
@@ -179,6 +215,10 @@ export default {
       this.currentParentId = keys[0]
       const { data } = await moduleInfo(this.currentParentId)
       this.currentModule = data
+      if (this.currentParentId === this.$route.query.id || this.currentModule.parentId !== '0') {
+        this.queryCaseVo.moduleId = this.currentParentId
+        this.searchOperate()
+      }
     },
     onExpand () {
       console.log('Trigger Expand')
@@ -260,7 +300,7 @@ export default {
     insertFun (data) {
       if (data.code === 200) {
         this.$message.success('操作成功！')
-        // TODO 刷新用例列表
+        this.searchOperate()
       }
     },
     insertCase () {
@@ -270,13 +310,54 @@ export default {
         return
       }
       // 如果选择非公共模块 且是一级目录 则不允许添加用例
-      console.log(this.currentModule, 'currentModule')
       if (this.currentParentId !== this.$route.query.id && this.currentModule.parentId === '0') {
         this.$message.warning('非公共模块下, 请在该模块下添加子集模块后再创建用例！')
         return
       }
       this.type = 'insert'
       this.$refs.case.visible = true
+    },
+    // 预览业务描述
+    previewDesc (desc) {
+    },
+    onSelectChange (selectedRowKeys) {
+      console.log('selectedRowKeys changed: ', selectedRowKeys)
+      this.selectedRowKeys = selectedRowKeys
+    },
+    // 移除用例
+    removeCaseInfo (id) {
+      this.$confirm({
+        title: '确定要删除此条用例吗?',
+        content: '点击确认之后，将永久删除此用例信息！',
+        okText: '确认',
+        okType: 'danger',
+        cancelText: '取消',
+        onOk: async () => {
+          const data = await caseDelete(id)
+          if (data.code === 200) {
+            this.$message.success('移除成功')
+            this.searchOperate()
+          }
+        },
+        onCancel: () => {
+          this.$message.info('取消删除！')
+        }
+      })
+    },
+    // 编辑用例信息
+    updateCaseInfo (caseInfo) {
+      this.type = 'update'
+      this.$refs.case.visible = true
+      this.$nextTick(() => {
+        this.$refs.case.form.setFieldsValue({
+          name: caseInfo.name,
+          requestUrl: caseInfo.requestUrl
+        })
+        this.$refs.case.caseVo = caseInfo
+        this.$refs.case.initJson = caseInfo.requestData
+        this.$refs.case.initResponse = caseInfo.expectResponse
+        this.$refs.case.caseVo.description = caseInfo.businessDesc
+      })
     }
   }
 }
