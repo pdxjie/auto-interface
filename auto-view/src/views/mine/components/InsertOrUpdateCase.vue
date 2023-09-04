@@ -240,6 +240,7 @@ export default {
           this.caseVo.expectResponse = this.$refs.responseData.codeVal
           this.caseVo.moduleId = this.currentModule.id
           this.caseVo.businessDesc = this.caseVo.description
+          this.caseVo.headersMap = JSON.stringify(this.headersParams)
           if (this.type === 'insert') {
             caseCreate(this.caseVo).then(res => {
               this.$emit('insertFun', res)
