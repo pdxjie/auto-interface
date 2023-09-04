@@ -59,7 +59,7 @@ export default {
     return {
       editor: null, // 文本编辑器
       isSave: true, // 文件改动状态，是否保存
-      codeVal: null // 保存后的文本
+      codeVal: '' // 保存后的文本
     }
   },
   mounted () {

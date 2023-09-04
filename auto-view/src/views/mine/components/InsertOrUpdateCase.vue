@@ -46,11 +46,11 @@
                 <a-tab-pane key="1" tab="Params">
                   <a-table :columns="ParamsColumns" :data-source="paramsData" :pagination="false">
                     <template slot="paramsKey" slot-scope="text, record">
-                      <a-input style="height: 30px" v-model="record.paramsKey" placeholder="请输入参数名"/>
+                      <a-input @input="changeContentKey(record)" style="height: 30px" v-model="record.paramsKey" placeholder="请输入参数名"/>
                     </template>
                     <template slot="paramsVal" slot-scope="text, record">
                       <div class="display-flex align-items">
-                        <a-input style="height: 30px" v-model="record.paramsVal" placeholder="请输入参数名"/>
+                        <a-input @input="changeContentVal(record)" style="height: 30px" v-model="record.paramsVal" placeholder="请输入参数名"/>
                         <a-icon v-if="record.id === paramsData.length" @click="addParams" style="margin-left: 5px;cursor: pointer" type="plus"></a-icon>
                         <a-icon v-if="record.id !== paramsData.length" @click="removeParams(record)" style="margin-left: 5px;cursor: pointer;color: #cf1322" type="minus"></a-icon>
                       </div>
@@ -142,6 +142,7 @@
 </template>
 
 <script>
+import _ from 'lodash'
 import { mapState } from 'vuex'
 import { DEVICE_TYPE } from '@/utils/device'
 import MonacoEditor from '@/components/MonacoEditor'
@@ -169,7 +170,7 @@ export default {
       visible: false,
       caseVo: {
         caseRank: 1,
-        requestUrl: '',
+        requestUrl: 'http://localhost:8080',
         requestType: 'get'
       },
       initJson: '',
@@ -286,6 +287,25 @@ export default {
           }
         })
       }
+      // 截取?前面的链接地址
+      let originUrl = this.caseVo.requestUrl.split('?')[0]
+      if (param.id === 1 && this.paramsData.length === 2 && this.paramsData[1].paramsKey.trim() === '' && this.paramsData[1].paramsVal.trim() === '') {
+        this.caseVo.requestUrl = originUrl
+      } else {
+        const index = param.id
+        const params = this.caseVo.requestUrl.split('?')[1]
+        const paramArray = params.split('&')
+        // 数组 删除 索引下标为index的元素
+        paramArray.splice(index - 1, 1)
+        paramArray.forEach((item, index) => {
+          if (index === 0) {
+            originUrl = `${originUrl}?${item}`
+          } else {
+            originUrl += `&${item}`
+          }
+        })
+        this.caseVo.requestUrl = originUrl
+      }
     },
     // 添加参数
     addHeaders () {
@@ -324,7 +344,23 @@ export default {
     callback () {},
     changeRequestType (val) {
       this.caseVo.requestType = val
-    }
+    },
+    changeContentKey (record) {
+      this.assemblyDataKey(record)
+    },
+    changeContentVal (record) {
+      this.assemblyDataVal(record)
+    },
+    assemblyDataKey: _.debounce(function (record) {
+      if (record.id === 1) {
+        this.caseVo.requestUrl += `?${record.paramsKey}=`
+      } else {
+        this.caseVo.requestUrl += `&${record.paramsKey}=`
+      }
+    }, 1000),
+    assemblyDataVal: _.debounce(function (record) {
+      this.caseVo.requestUrl += `${record.paramsVal}`
+    }, 1000)
   }
 }
 </script>
