@@ -1,5 +1,6 @@
 package com.pdx.modal.vo;
 
+import com.alibaba.fastjson.JSONObject;
 import com.pdx.entity.TestCase;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
@@ -14,4 +15,11 @@ public class CaseInsertVo extends TestCase {
 
     @ApiModelProperty(value = "模块ID")
     private String moduleId;
+
+    @ApiModelProperty(value = "请求头")
+    private JSONObject headerMap;
+
+    @ApiModelProperty(value = "请求类型")
+    private String requestType;
+
 }
