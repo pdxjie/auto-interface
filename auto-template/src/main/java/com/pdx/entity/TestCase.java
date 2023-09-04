@@ -57,4 +57,10 @@ public class TestCase implements Serializable {
 
     @ApiModelProperty(value = "更新时间")
     private Date updateTime;
+
+    @ApiModelProperty(value = "请求头")
+    private String headers;
+
+    @ApiModelProperty(value = "请求类型")
+    private Integer requestType;
 }
