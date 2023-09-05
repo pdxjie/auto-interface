@@ -4,12 +4,16 @@ import com.alibaba.fastjson.JSONObject;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpDelete;
+import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
+import org.apache.http.client.methods.HttpPut;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.util.EntityUtils;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.util.Map;
 import java.util.Set;
 
 /*
@@ -25,7 +29,7 @@ public class HttpUtils {
      * @param url 请求地址
      * @param jsonObject 请求参数
      */
-    public static JSONObject postJson (String url, JSONObject jsonObject) {
+    public static JSONObject postJson(String url, JSONObject jsonObject, Map<String, Object> headers) {
         // 创建HttpClient对象
         HttpClient httpClient = HttpClientBuilder.create().build();
         // 创建HttpPost对象
@@ -35,9 +39,107 @@ public class HttpUtils {
         // 设置参数
         httpPost.setEntity(new StringEntity(jsonObject.toString(), StandardCharsets.UTF_8));
         httpPost.setHeader("Content-Type", "application/json");
+        if (headers != null) {
+            Set<String> keys = headers.keySet();
+            for (String key : keys) {
+                httpPost.setHeader(key, headers.get(key).toString());
+            }
+        }
         try {
             // 发送 POST 请求
             HttpResponse response = httpClient.execute(httpPost);
+            HttpEntity entity = response.getEntity();
+            // 响应内容
+            String result = EntityUtils.toString(entity, StandardCharsets.UTF_8);
+            return JSONObject.parseObject(result);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    /**
+     * 发送 GET 请求
+     * @param url 请求地址
+     */
+    public static JSONObject getJson(String url, Map<String, Object> headers) {
+        // 创建HttpClient对象
+        HttpClient httpClient = HttpClientBuilder.create().build();
+        // 创建HttpGet对象
+        HttpGet httpGet = new HttpGet(url);
+        // 设置请求头
+        if (headers != null) {
+            Set<String> keys = headers.keySet();
+            for (String key : keys) {
+                httpGet.setHeader(key, headers.get(key).toString());
+            }
+        }
+        try {
+            // 发送 GET 请求
+            HttpResponse response = httpClient.execute(httpGet);
+            HttpEntity entity = response.getEntity();
+            // 响应内容
+            String result = EntityUtils.toString(entity, StandardCharsets.UTF_8);
+            return JSONObject.parseObject(result);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    /**
+     * 发送 PUT 请求
+     * @param url 请求地址
+     * @param jsonObject 请求参数
+     * @param headers 请求头
+     * @return JSONObject
+     */
+    public static JSONObject putJson (String url, JSONObject jsonObject, Map<String, Object> headers) {
+        // 创建HttpClient对象
+        HttpClient httpClient = HttpClientBuilder.create().build();
+        // 创建HttpPut对象
+        HttpPut httpPut = new HttpPut(url);
+        // 设置参数
+        httpPut.setEntity(new StringEntity(jsonObject.toString(), StandardCharsets.UTF_8));
+        httpPut.setHeader("Content-Type", "application/json");
+        // 设置请求头
+        if (headers != null) {
+            Set<String> keys = headers.keySet();
+            for (String key : keys) {
+                httpPut.setHeader(key, headers.get(key).toString());
+            }
+        }
+        // 发送 PUT 请求
+        try {
+            HttpResponse response = httpClient.execute(httpPut);
+            HttpEntity entity = response.getEntity();
+            // 响应内容
+            String result = EntityUtils.toString(entity, StandardCharsets.UTF_8);
+            return JSONObject.parseObject(result);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    /**
+     * 发送 DELETE 请求
+     * @param url 请求地址
+     * @param headers 请求头
+     * @return  JSONObject
+     */
+    public static JSONObject deleteJson (String url, Map<String, Object> headers) {
+        // 创建HttpClient对象
+        HttpClient httpClient = HttpClientBuilder.create().build();
+        // 创建HttpPut对象
+        HttpDelete httpDelete = new HttpDelete(url);
+        // 设置请求头
+        if (headers != null) {
+            Set<String> keys = headers.keySet();
+            for (String key : keys) {
+                httpDelete.setHeader(key, headers.get(key).toString());
+            }
+        }
+        // 发送 DELETE 请求
+        try {
+            HttpResponse response = httpClient.execute(httpDelete);
             HttpEntity entity = response.getEntity();
             // 响应内容
             String result = EntityUtils.toString(entity, StandardCharsets.UTF_8);

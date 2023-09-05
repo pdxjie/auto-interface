@@ -1,6 +1,7 @@
 package com.pdx.service.impl;
 
 import cn.hutool.core.util.StrUtil;
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
@@ -63,6 +64,8 @@ public class TestCaseServiceImpl extends ServiceImpl<TestCaseMapper, TestCase> i
         testCase.setCreateTime(new Date());
         testCase.setUpdateTime(new Date());
         testCase.setStatus(1);
+        testCase.setHeaders(vo.getHeaderMap());
+        testCase.setRequestType(vo.getRequestType());
         ModuleCase moduleCase = new ModuleCase();
         moduleCase.setCaseId(caseId);
         moduleCase.setModuleId(vo.getModuleId());
@@ -105,18 +108,62 @@ public class TestCaseServiceImpl extends ServiceImpl<TestCaseMapper, TestCase> i
     public Result<?> runCase(TestCase caseInfo) {
         JSONObject requestData = JSONObject.parseObject(caseInfo.getRequestData());
         JSONObject expectData = JSONObject.parseObject(caseInfo.getExpectResponse());
-        JSONObject resultJson = HttpUtils.postJson(caseInfo.getRequestUrl(), requestData);
-        boolean success = HttpUtils.isSuccess(expectData, resultJson);
-        // 如果返回 true 更新用例执行结果
-        if (success) {
+        // headers
+        Map<String, Object> headers = new HashMap<>();
+        if (StringUtils.isNoneEmpty(caseInfo.getHeaders())) {
+            JSONArray jsonArray = JSONObject.parseArray(caseInfo.getHeaders());
+            for (int i = 0; i < jsonArray.size(); i++) {
+                JSONObject jsonObject = jsonArray.getJSONObject(i);
+                headers.put(jsonObject.getString("paramsKey"), jsonObject.getString("paramsVal"));
+            }
+        }
+
+        // 接口实际返回结果
+        JSONObject result = null;
+        // 返回响应结果
+        Map<String, Object> resultMap = new HashMap<>();
+        switch (caseInfo.getRequestType()) {
+            // GET 请求
+            case 1:
+                result = HttpUtils.getJson(caseInfo.getRequestUrl(), headers);
+                break;
+            // POST 请求
+            case 2:
+                result = HttpUtils.postJson(caseInfo.getRequestUrl(), requestData, headers);
+                break;
+            // PUT 请求
+            case 3:
+                result = HttpUtils.putJson(caseInfo.getRequestUrl(), requestData, headers);
+                break;
+            // DELETE 请求
+            case 4:
+                result = HttpUtils.deleteJson(caseInfo.getRequestUrl(), headers);
+                break;
+        }
+        // 判断是否有预期结果
+        if (StringUtils.isEmpty(caseInfo.getExpectResponse())) {
+            // 如果没有预期结果，则用例执行结果为成功，返回接口实际返回结果
             caseInfo.setStatus(3);
             caseInfo.setUpdateTime(new Date());
             baseMapper.updateById(caseInfo);
+            resultMap.put("result", result);
+            resultMap.put("isSuccess", true);
+            return Result.success(resultMap);
         } else {
-            caseInfo.setStatus(4);
-            caseInfo.setUpdateTime(new Date());
-            baseMapper.updateById(caseInfo);
+            boolean success = HttpUtils.isSuccess(expectData, result);
+            // 如果返回 true 更新用例执行结果
+            if (success) {
+                caseInfo.setStatus(3);
+                caseInfo.setUpdateTime(new Date());
+                baseMapper.updateById(caseInfo);
+            } else {
+                caseInfo.setStatus(4);
+                caseInfo.setUpdateTime(new Date());
+                baseMapper.updateById(caseInfo);
+            }
+            resultMap.put("result", result);
+            resultMap.put("isSuccess", success);
+            return Result.success(resultMap);
         }
-        return Result.success(success);
     }
 }
