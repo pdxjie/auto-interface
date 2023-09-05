@@ -103,7 +103,6 @@ export default {
       that.editor.onDidChangeModelContent(function (event) {
         // 编辑器内容 change 事件
         that.codeVal = that.editor.getValue()
-        console.log(that.codeVal, 'val')
       })
     }
   }

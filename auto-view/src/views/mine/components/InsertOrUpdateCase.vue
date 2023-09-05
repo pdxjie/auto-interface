@@ -34,11 +34,17 @@
                 placeholder="请输入请求地址"
               >
                 <a-select slot="addonBefore" @change="changeRequestType" v-model="caseVo.requestType" style="width: 90px">
-                  <a-select-option value="get">
+                  <a-select-option :value="1">
                     GET
                   </a-select-option>
-                  <a-select-option value="post">
+                  <a-select-option :value="2">
                     POST
+                  </a-select-option>
+                  <a-select-option :value="3">
+                    PUT
+                  </a-select-option>
+                  <a-select-option :value="4">
+                    DELETE
                   </a-select-option>
                 </a-select>
               </a-input>
@@ -61,7 +67,7 @@
                   <MonacoEditor ref="initRequestData" height="400px" language="json" :code="initJson"/>
                 </a-tab-pane>
                 <a-tab-pane key="3" tab="Header">
-                  <a-table :columns="ParamsColumns" :data-source="paramsData" :pagination="false">
+                  <a-table :columns="ParamsColumns" :data-source="headersParams" :pagination="false">
                     <template slot="paramsKey" slot-scope="text, record">
                       <a-input style="height: 30px" v-model="record.paramsKey" placeholder="请输入参数名"/>
                     </template>
@@ -171,7 +177,7 @@ export default {
       caseVo: {
         caseRank: 1,
         requestUrl: 'http://localhost:8080',
-        requestType: 'get'
+        requestType: 1
       },
       initJson: '',
       initResponse: '',
@@ -224,11 +230,12 @@ export default {
     submitCaseInfo () {
       this.form.validateFields((err, values) => {
         if (!err) {
-          if (this.paramsData.length === 1 && this.paramsData[0].paramsKey.trim() === '' && this.caseVo.requestType === 'get') {
+          if (this.paramsData.length === 1 && this.paramsData[0].paramsKey.trim() === '' && this.caseVo.requestType === 1) {
             this.$message.error('请求方式为 GET 时，参数不能为空！')
             return
           }
-          if (this.$refs.initRequestData.codeVal.trim() === '' && this.caseVo.requestType === 'post') {
+          console.log(this.$refs.initRequestData, 'xxxxxx')
+          if (this.caseVo.requestType === 2 && !this.$refs.initRequestData) {
             this.$message.error('请求方式为 POST 时，请求体不能为空！')
             return
           }
@@ -236,11 +243,11 @@ export default {
           const { name } = values
           // 封装数据
           this.caseVo.name = name
-          this.caseVo.requestData = this.$refs.initRequestData.codeVal
-          this.caseVo.expectResponse = this.$refs.responseData.codeVal
+          this.caseVo.requestData = this.$refs.initRequestData && this.$refs.initRequestData.codeVal
+          this.caseVo.expectResponse = this.$refs.responseData && this.$refs.responseData.codeVal
           this.caseVo.moduleId = this.currentModule.id
           this.caseVo.businessDesc = this.caseVo.description
-          this.caseVo.headersMap = JSON.stringify(this.headersParams)
+          this.caseVo.headerMap = JSON.stringify(this.headersParams)
           if (this.type === 'insert') {
             caseCreate(this.caseVo).then(res => {
               this.$emit('insertFun', res)

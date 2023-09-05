@@ -27,8 +27,7 @@
                 :tree-data="treeData"
                 multiple
                 default-expand-all
-                @select="onSelect"
-                @expand="onExpand">
+                @select="onSelect">
                 <template slot="custom" slot-scope="{ selected }">
                   <a-icon style="position:absolute;right: 0px" :type="selected ? 'frown' : 'frown-o'" />
                 </template>
@@ -227,9 +226,6 @@ export default {
         this.searchOperate()
       }
     },
-    onExpand () {
-      console.log('Trigger Expand')
-    },
     handleChangeItem () {},
     insertModule () {
       this.type = 'insert'
@@ -355,6 +351,7 @@ export default {
     },
     // 编辑用例信息
     updateCaseInfo (caseInfo) {
+      console.log(caseInfo, 'caseInfo')
       this.type = 'update'
       this.$refs.case.visible = true
       this.$nextTick(() => {
@@ -366,17 +363,38 @@ export default {
         this.$refs.case.initJson = caseInfo.requestData
         this.$refs.case.initResponse = caseInfo.expectResponse
         this.$refs.case.caseVo.description = caseInfo.businessDesc
+        this.$refs.case.headersParams = JSON.parse(caseInfo.headers)
+        const params = caseInfo.requestUrl.split('?')[1]
+        if (params.indexOf('&') > -1) {
+          const temp = params.split('&')
+          temp.forEach((item, index) => {
+            const tempItem = item.split('=')
+            this.$refs.case.paramsData.push({
+              id: index + 1,
+              paramsKey: tempItem[0],
+              paramsVal: tempItem[1]
+            })
+          })
+        } else {
+          const tempItem = params.split('=')
+          this.$refs.case.paramsData = []
+          this.$refs.case.paramsData.push({
+            id: 1,
+            paramsKey: tempItem[0],
+            paramsVal: tempItem[1]
+          })
+        }
       })
     },
     // 执行用例
     async runCase (caseInfo) {
       this.$set(caseInfo, 'status', 2)
       const data = await caseRun(caseInfo)
-      if (data.code === 200 && data.data) {
+      if (data.code === 200 && data.data.isSuccess) {
         setTimeout(() => {
           this.$set(caseInfo, 'status', 3)
         }, 2000)
-      } else if (data.code === 200 && !data.data) {
+      } else if (data.code === 200 && !data.data.isSuccess) {
         setTimeout(() => {
           this.$set(caseInfo, 'status', 4)
         }, 2000)
