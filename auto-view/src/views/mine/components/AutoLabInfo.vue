@@ -51,8 +51,9 @@
                 <div class="margin-t-16">
                   <div class="font-size-18 font-w-500">全部用例（234）</div>
                 </div>
-                <div class="margin-t-16">
-                  <a-input ref="userNameInput" v-model="queryCaseVo.name" placeholder="通过用例名称检索">
+                <div class="margin-t-16 display-flex align-items">
+                  <a-button style="margin-right: 10px" type="primary" @click="batchRunCaseInfo" v-show="selectedRowKeys.length > 1">批量执行</a-button>
+                  <a-input ref="userNameInput" @keyup.enter="searchEnterFun" v-model="queryCaseVo.name" placeholder="通过用例名称检索">
                     <a-icon slot="prefix" type="search" />
                   </a-input>
                 </div>
@@ -90,7 +91,7 @@
                         </a>
                         <a-menu slot="overlay">
                           <a-menu-item>
-                            <a href="javascript:;">执行详情</a>
+                            <a href="javascript:;">测试报告</a>
                           </a-menu-item>
                           <a-menu-item>
                             <a @click="updateCaseInfo(record)">编辑用例</a>
@@ -133,7 +134,7 @@ import { caseColumns } from '@/views/mine'
 import { deleteModule, getModuleList, moduleInfo, updateModule } from '@/api/module'
 import AddOrEditModule from '@/views/mine/components/AddOrEditModule'
 import InsertOrUpdateCase from '@/views/mine/components/InsertOrUpdateCase'
-import { caseDelete, casePage, caseRun } from '@/api/case'
+import { batchRunCase, caseDelete, casePage, caseRun } from '@/api/case'
 import PreviewBusinessDesc from '@/views/mine/components/PreviewBusinessDesc.vue'
 
 export default {
@@ -266,6 +267,20 @@ export default {
         }
       })
     },
+    // 回车搜索
+    searchEnterFun () {
+      this.searchOperate()
+    },
+    // 批量执行用例
+    async batchRunCaseInfo () {
+      const data = await batchRunCase(this.selectedRowKeys)
+      console.log(data)
+      if (data.code === 200) {
+        this.$message.success('批量执行成功！')
+      } else {
+        this.$message.error('批量执行失败！')
+      }
+    },
     removeModuleById () {
       deleteModule(this.currentParentId).then(res => {
         if (res.code === 200) {
@@ -352,6 +367,13 @@ export default {
     // 编辑用例信息
     updateCaseInfo (caseInfo) {
       console.log(caseInfo, 'caseInfo')
+      const defaultHeaders = [
+        {
+          id: 1,
+          paramsKey: '',
+          paramsVal: ''
+        }
+      ]
       this.type = 'update'
       this.$refs.case.visible = true
       this.$nextTick(() => {
@@ -363,7 +385,17 @@ export default {
         this.$refs.case.initJson = caseInfo.requestData
         this.$refs.case.initResponse = caseInfo.expectResponse
         this.$refs.case.caseVo.description = caseInfo.businessDesc
-        this.$refs.case.headersParams = JSON.parse(caseInfo.headers)
+        this.$refs.case.headersParams = caseInfo.headers ? JSON.parse(caseInfo.headers) : defaultHeaders
+        if (caseInfo.requestUrl.indexOf('?') === -1) {
+          this.$refs.case.paramsData = [
+            {
+              id: 1,
+              paramsKey: '',
+              paramsVal: ''
+            }
+          ]
+          return
+        }
         const params = caseInfo.requestUrl.split('?')[1]
         if (params.indexOf('&') > -1) {
           const temp = params.split('&')
@@ -393,10 +425,12 @@ export default {
       if (data.code === 200 && data.data.isSuccess) {
         setTimeout(() => {
           this.$set(caseInfo, 'status', 3)
+          this.$message.success('执行成功！')
         }, 2000)
       } else if (data.code === 200 && !data.data.isSuccess) {
         setTimeout(() => {
           this.$set(caseInfo, 'status', 4)
+          this.$message.error('执行失败！')
         }, 2000)
       }
     }

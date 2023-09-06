@@ -230,11 +230,6 @@ export default {
     submitCaseInfo () {
       this.form.validateFields((err, values) => {
         if (!err) {
-          if (this.paramsData.length === 1 && this.paramsData[0].paramsKey.trim() === '' && this.caseVo.requestType === 1) {
-            this.$message.error('请求方式为 GET 时，参数不能为空！')
-            return
-          }
-          console.log(this.$refs.initRequestData, 'xxxxxx')
           if (this.caseVo.requestType === 2 && !this.$refs.initRequestData) {
             this.$message.error('请求方式为 POST 时，请求体不能为空！')
             return

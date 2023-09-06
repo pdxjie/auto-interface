@@ -55,3 +55,12 @@ export const caseRun = (caseInfo) => {
     data: caseInfo
   })
 }
+
+// 批量执行用例
+export const batchRunCase = (caseIds) => {
+  return axios({
+    url: '/case/batchRun',
+    method: METHOD_TYPE.POST,
+    data: caseIds
+  })
+}
