@@ -17,6 +17,7 @@ import com.pdx.response.ResponseCode;
 import com.pdx.response.Result;
 import com.pdx.service.TestCaseService;
 import com.pdx.utils.HttpUtils;
+import com.pdx.utils.XmlUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
@@ -110,7 +111,7 @@ public class TestCaseServiceImpl extends ServiceImpl<TestCaseMapper, TestCase> i
         JSONObject expectData = JSONObject.parseObject(caseInfo.getExpectResponse());
         // headers
         Map<String, Object> headers = new HashMap<>();
-        if (StringUtils.isNoneEmpty(caseInfo.getHeaders())) {
+        if (StringUtils.isNotEmpty(caseInfo.getHeaders())) {
             JSONArray jsonArray = JSONObject.parseArray(caseInfo.getHeaders());
             for (int i = 0; i < jsonArray.size(); i++) {
                 JSONObject jsonObject = jsonArray.getJSONObject(i);
@@ -165,5 +166,16 @@ public class TestCaseServiceImpl extends ServiceImpl<TestCaseMapper, TestCase> i
             resultMap.put("isSuccess", success);
             return Result.success(resultMap);
         }
+    }
+
+    @Override
+    public Result<?> batchRunCaseInfo(List<String> caseIds) {
+        if (caseIds.isEmpty()) {
+            throw new BusinessException(ResponseCode.ERROR_PARAM);
+        }
+        // 查询所有的用例
+        List<TestCase> testCases = baseMapper.selectBatchIds(caseIds);
+        XmlUtils.runXml(testCases.toString());
+        return Result.success();
     }
 }

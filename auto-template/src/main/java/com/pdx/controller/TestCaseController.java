@@ -6,9 +6,12 @@ import com.pdx.modal.vo.CaseInsertVo;
 import com.pdx.modal.vo.CaseQueryVo;
 import com.pdx.response.Result;
 import com.pdx.service.TestCaseService;
+import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 /**
  * <p>
@@ -18,6 +21,7 @@ import org.springframework.web.bind.annotation.*;
  * @author 派同学
  * @since 2023-08-26
  */
+@Api(tags = "用例模块接口")
 @RestController
 @RequestMapping("/case")
 public class TestCaseController {
@@ -59,6 +63,12 @@ public class TestCaseController {
     @PostMapping("/run")
     public Result<?> runCase (@RequestBody TestCase caseInfo) {
         return testCaseService.runCase(caseInfo);
+    }
+
+    @ApiOperation(value = "批量执行用例")
+    @PostMapping("/batchRun")
+    public Result<?> batchRunCaseInfo(@RequestBody List<String> caseIds) {
+        return testCaseService.batchRunCaseInfo(caseIds);
     }
 }
 

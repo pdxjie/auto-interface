@@ -1,15 +1,15 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE suite SYSTEM "https://testng.org/testng-1.0.dtd">
 <suite name="api接口">
-    <test name="接口测试">
+    <parameter name="params" value="params"/>
+
+    <test name="testName">
         <classes>
-            <class name="com.pdx.testng.Test05"></class>
+            <class name="com.pdx.utils.GeneratorReport"/>
         </classes>
     </test>
-    <parameter name="name" value="zhangsan"></parameter>
-    <parameter name="password" value="123"></parameter>
 
     <listeners>
-        <listener class-name="com.pdx.config.ExtentReporter"></listener>
+        <listener class-name="com.pdx.config.ExtentReporter"/>
     </listeners>
 </suite>

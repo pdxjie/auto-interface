@@ -6,6 +6,8 @@ import com.pdx.modal.vo.CaseInsertVo;
 import com.pdx.modal.vo.CaseQueryVo;
 import com.pdx.response.Result;
 
+import java.util.List;
+
 /**
  * <p>
  *  服务类
@@ -27,4 +29,6 @@ public interface TestCaseService extends IService<TestCase> {
     Result<?> removeCaseInfoById(String id);
 
     Result<?> runCase(TestCase caseInfo);
+
+    Result<?> batchRunCaseInfo(List<String> caseIds);
 }

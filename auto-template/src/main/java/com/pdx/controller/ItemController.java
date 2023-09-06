@@ -5,6 +5,7 @@ import com.pdx.entity.Item;
 import com.pdx.modal.vo.QueryItemVo;
 import com.pdx.response.Result;
 import com.pdx.service.ItemService;
+import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -17,6 +18,7 @@ import org.springframework.web.bind.annotation.*;
  * @author 派同学
  * @since 2023-08-26
  */
+@Api(tags = "项目模块管理")
 @RestController
 @RequestMapping("/pdx/item")
 public class ItemController {
