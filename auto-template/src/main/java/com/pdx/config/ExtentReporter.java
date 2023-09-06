@@ -21,7 +21,7 @@ import java.util.*;
  **/
 public class ExtentReporter implements IReporter {
     // 生成的路径以及文件名
-    private static final String OUTPUT_FOLDER = "test-output/";
+    private static final String OUTPUT_FOLDER = "report/";
     //注意这里如果用index.html可能会导致testng的report会覆盖它
     private static Date date=new Date();
     private static SimpleDateFormat dateFormat=new SimpleDateFormat("YYYYMMddHHmm");
