@@ -35,7 +35,7 @@ public class XmlUtils {
         // 创建Map<String, String>对象
         Map<String, String> params = new HashMap<>();
         // 传入参数
-        params.put("params", param);
+        params.put("param", param);
         // 设置参数
         xmlSuite.setParameters(params);
         // 设置执行xml文件

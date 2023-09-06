@@ -4,6 +4,7 @@ import cn.hutool.json.JSONUtil;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.pdx.entity.TestCase;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.testng.Assert;
 import org.testng.annotations.BeforeSuite;
@@ -18,17 +19,18 @@ import java.util.*;
  * @Description 测试报告
  * @Date 2023/9/6
  **/
+@Slf4j
 public class GeneratorReport {
 
-    private String params;
+    private String param;
 
     @BeforeSuite
-    @Parameters("params")
-    public void beforeSuite(String params) {
-        this.params = params;
+    @Parameters("param")
+    public void beforeSuite(String param) {
+        this.param = param;
     }
 
-    @Test(dataProvider = "fetchParams")
+    @Test(dataProvider = "fetchParam")
     public void generatorResultReport(TestCase caseInfo) {
         JSONObject result = null;
         JSONObject requestData = JSONObject.parseObject(caseInfo.getRequestData());
@@ -66,11 +68,13 @@ public class GeneratorReport {
         Assert.assertTrue(success, result.toJSONString());
     }
 
-    @DataProvider(name = "fetchParams")
+    @DataProvider(name = "fetchParam")
     public Iterator<Object[]> fetchLinks() throws Exception{
         List<TestCase> cases = new ArrayList<>();
         // 将参数转为 用例集合
-        JSONArray caseArray = JSONObject.parseArray(this.params);
+        JSONArray caseArray = JSONObject.parseArray(this.param);
+        log.info("param ---> {}", this.param);
+        log.info("caseArray ---> {}", caseArray);
         caseArray.forEach(caseJson -> {
             TestCase testCase = JSONUtil.toBean(caseJson.toString(), TestCase.class);
             cases.add(testCase);

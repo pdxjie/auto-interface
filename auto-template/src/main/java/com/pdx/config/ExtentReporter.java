@@ -23,10 +23,10 @@ public class ExtentReporter implements IReporter {
     // 生成的路径以及文件名
     private static final String OUTPUT_FOLDER = "report/";
     //注意这里如果用index.html可能会导致testng的report会覆盖它
-    private static Date date=new Date();
-    private static SimpleDateFormat dateFormat=new SimpleDateFormat("YYYYMMddHHmm");
-    private static String nowTime=dateFormat.format(date);
-    private static final String FILE_NAME =nowTime+".html";
+    private static Date date = new Date();
+    private static SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+    private static String nowTime = dateFormat.format(date);
+    private static final String FILE_NAME = nowTime + ".html";
 
     private ExtentReports extent;
 
@@ -40,7 +40,7 @@ public class ExtentReporter implements IReporter {
         for (ISuite suite : suites) {
             Map<String, ISuiteResult> result = suite.getResults();
             // 如果suite里面没有任何用例，直接跳过，不在报告里生成
-            if (result.size() == 0) {
+            if (result.isEmpty()) {
                 continue;
             }
             // 统计suite下的成功、失败、跳过的总用例数
@@ -104,10 +104,6 @@ public class ExtentReporter implements IReporter {
             }
 
         }
-        // for (String s : Reporter.getOutput()) {
-        // extent.setTestRunnerOutput(s);
-        // }
-
         extent.flush();
     }
 
