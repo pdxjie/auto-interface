@@ -48,7 +48,7 @@
           </a-tab-pane>
           <a-tab-pane key="2" tab="Body">
             <div style="border: 1px solid #eee;padding: 10px 10px 10px 0px;border-radius: 8px;">
-              <MonacoEditorNotDark ref="initRequestData" height="300px" language="json" :code="initJson"/>
+              <MonacoEditorNotDark ref="initRequestData" height="350px" language="json" :code="initJson"/>
             </div>
           </a-tab-pane>
           <a-tab-pane key="3" tab="Header">
@@ -70,7 +70,7 @@
     </div>
     <div class="margin-t-16" style="border: 1px solid #eee;padding: 10px 10px 10px 0px;border-radius: 8px;">
       <span style="margin-left: 35px;margin-bottom: 10px">响应结果</span>
-      <MonacoEditorNotDark ref="initResponseData" height="300px" language="json" :code="initResponse"/>
+      <MonacoEditorNotDark ref="initResponseData" height="350px" language="json" :code="initResponse"/>
     </div>
   </div>
 </template>
