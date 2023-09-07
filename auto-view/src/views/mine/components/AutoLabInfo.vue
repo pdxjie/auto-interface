@@ -3,7 +3,7 @@
     <div class="margin-t-16 card-layout">
       <div class="margin-b-16">
         <a-button @click="insertCase" type="primary" style="height: 40px" icon="plus">创建用例</a-button>
-        <a-button icon="upload" style="height: 40px;margin-left: 10px">导入</a-button>
+        <a-button @click="toOnline" :icon="isOnline ? 'rollback' : 'ci'" style="height: 40px;margin-left: 10px">{{ isOnline ? '返回用例' : '在线执行' }}</a-button>
       </div>
       <a-card style="border-radius: 8px">
         <a-layout id="components-layout-demo-side" style="min-height: 100%;">
@@ -47,63 +47,68 @@
           </a-layout-sider>
           <a-layout>
             <a-layout-content style="background: #fff;padding-left: 10px">
-              <div class="display-flex justify-between">
-                <div class="margin-t-16">
-                  <div class="font-size-18 font-w-500">全部用例（234）</div>
+              <div v-if="!isOnline">
+                <div class="display-flex justify-between">
+                  <div class="margin-t-16">
+                    <div class="font-size-18 font-w-500">全部用例（234）</div>
+                  </div>
+                  <div class="margin-t-16 display-flex align-items">
+                    <a-button style="margin-right: 10px" type="primary" @click="batchRunCaseInfo" v-show="selectedRowKeys.length > 1">批量执行</a-button>
+                    <a-input ref="userNameInput" @keyup.enter="searchEnterFun" v-model="queryCaseVo.name" placeholder="通过用例名称检索">
+                      <a-icon slot="prefix" type="search" />
+                    </a-input>
+                  </div>
                 </div>
-                <div class="margin-t-16 display-flex align-items">
-                  <a-button style="margin-right: 10px" type="primary" @click="batchRunCaseInfo" v-show="selectedRowKeys.length > 1">批量执行</a-button>
-                  <a-input ref="userNameInput" @keyup.enter="searchEnterFun" v-model="queryCaseVo.name" placeholder="通过用例名称检索">
-                    <a-icon slot="prefix" type="search" />
-                  </a-input>
+                <!-- 用例列表 -->
+                <div class="margin-t-10">
+                  <a-table
+                    :loading="loading"
+                    :row-key="record => record.id"
+                    :row-selection="{ selectedRowKeys: selectedRowKeys, onChange: onSelectChange }"
+                    :columns="caseColumns"
+                    :data-source="caseData"
+                    :pagination="pagination">
+                    <template slot="caseRank" slot-scope="text, record">
+                      <a-tag color="red" v-if="record.caseRank === 1">P0</a-tag>
+                      <a-tag color="orange" v-if="record.caseRank === 2">P1</a-tag>
+                      <a-tag v-if="record.caseRank === 3">P2</a-tag>
+                    </template>
+                    <template slot="businessDesc" slot-scope="text, record">
+                      <a @click="previewDesc(record.businessDesc)" style="color: #2eabff">预览</a>
+                    </template>
+                    <template slot="status" slot-scope="text, record">
+                      <a v-if="record.status === 1" style="color: #2eabff">未执行</a>
+                      <a v-if="record.status === 2" >执行中</a>
+                      <a v-if="record.status === 3" style="color: #52c41a">成功</a>
+                      <a v-if="record.status === 4" style="color: #cf1322">失败</a>
+                    </template>
+                    <template slot="action" slot-scope="text, record">
+                      <div class="display-flex align-items justify-content">
+                        <a-icon @click="runCase(record)" v-if="record.status !== 2" style="font-size: 20px;cursor: pointer" type="play-circle" />
+                        <a-icon v-if="record.status === 2" style="font-size: 20px;cursor: pointer" type="pause-circle" />
+                        <a-dropdown style="margin-left: 10px;margin-top: -8px" :trigger="['click']">
+                          <a class="ant-dropdown-link" @click="e => e.preventDefault()">
+                            ...
+                          </a>
+                          <a-menu slot="overlay">
+                            <a-menu-item>
+                              <a href="javascript:;">测试报告</a>
+                            </a-menu-item>
+                            <a-menu-item>
+                              <a @click="updateCaseInfo(record)">编辑用例</a>
+                            </a-menu-item>
+                            <a-menu-item>
+                              <a @click="removeCaseInfo(record.id)">移除用例</a>
+                            </a-menu-item>
+                          </a-menu>
+                        </a-dropdown>
+                      </div>
+                    </template>
+                  </a-table>
                 </div>
               </div>
-              <!-- 用例列表 -->
-              <div class="margin-t-10">
-                <a-table
-                  :loading="loading"
-                  :row-key="record => record.id"
-                  :row-selection="{ selectedRowKeys: selectedRowKeys, onChange: onSelectChange }"
-                  :columns="caseColumns"
-                  :data-source="caseData"
-                  :pagination="pagination">
-                  <template slot="caseRank" slot-scope="text, record">
-                    <a-tag color="red" v-if="record.caseRank === 1">P0</a-tag>
-                    <a-tag color="orange" v-if="record.caseRank === 2">P1</a-tag>
-                    <a-tag v-if="record.caseRank === 3">P2</a-tag>
-                  </template>
-                  <template slot="businessDesc" slot-scope="text, record">
-                    <a @click="previewDesc(record.businessDesc)" style="color: #2eabff">预览</a>
-                  </template>
-                  <template slot="status" slot-scope="text, record">
-                    <a v-if="record.status === 1" style="color: #2eabff">未执行</a>
-                    <a v-if="record.status === 2" >执行中</a>
-                    <a v-if="record.status === 3" style="color: #52c41a">成功</a>
-                    <a v-if="record.status === 4" style="color: #cf1322">失败</a>
-                  </template>
-                  <template slot="action" slot-scope="text, record">
-                    <div class="display-flex align-items justify-content">
-                      <a-icon @click="runCase(record)" v-if="record.status !== 2" style="font-size: 20px;cursor: pointer" type="play-circle" />
-                      <a-icon v-if="record.status === 2" style="font-size: 20px;cursor: pointer" type="pause-circle" />
-                      <a-dropdown style="margin-left: 10px;margin-top: -8px" :trigger="['click']">
-                        <a class="ant-dropdown-link" @click="e => e.preventDefault()">
-                          ...
-                        </a>
-                        <a-menu slot="overlay">
-                          <a-menu-item>
-                            <a href="javascript:;">测试报告</a>
-                          </a-menu-item>
-                          <a-menu-item>
-                            <a @click="updateCaseInfo(record)">编辑用例</a>
-                          </a-menu-item>
-                          <a-menu-item>
-                            <a @click="removeCaseInfo(record.id)">移除用例</a>
-                          </a-menu-item>
-                        </a-menu>
-                      </a-dropdown>
-                    </div>
-                  </template>
-                </a-table>
+              <div v-else>
+                <ExecuteOnline ref="online"/>
               </div>
             </a-layout-content>
           </a-layout>
@@ -136,10 +141,11 @@ import AddOrEditModule from '@/views/mine/components/AddOrEditModule'
 import InsertOrUpdateCase from '@/views/mine/components/InsertOrUpdateCase'
 import { batchRunCase, caseDelete, casePage, caseRun } from '@/api/case'
 import PreviewBusinessDesc from '@/views/mine/components/PreviewBusinessDesc.vue'
+import ExecuteOnline from '@/views/mine/components/ExecuteOnline.vue'
 
 export default {
   name: 'AutoLabInfo',
-  components: { PreviewBusinessDesc, InsertOrUpdateCase, AddOrEditModule },
+  components: { ExecuteOnline, PreviewBusinessDesc, InsertOrUpdateCase, AddOrEditModule },
   data () {
     return {
       treeData: [],
@@ -164,7 +170,8 @@ export default {
       type: '',
       currentModule: null,
       loading: false,
-      selectedRowKeys: []
+      selectedRowKeys: [],
+      isOnline: false // 页面显示方式
     }
   },
   mounted () {
@@ -174,6 +181,10 @@ export default {
     this.moduleListByItemId(this.$route.query.id)
   },
   methods: {
+    // 在线执行
+    toOnline () {
+      this.isOnline = !this.isOnline
+    },
     // 表格改变时触发
     handleTableChange (pagination, filters, sorter) {
       this.pagination = pagination

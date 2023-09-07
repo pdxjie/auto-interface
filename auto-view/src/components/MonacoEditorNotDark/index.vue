@@ -7,7 +7,7 @@
 <script>
 import * as monaco from 'monaco-editor/esm/vs/editor/edcore.main'
 export default {
-  name: 'MonacoEditor',
+  name: 'MonacoEditorNotDark',
   props: {
     name: {
       type: String
@@ -83,7 +83,7 @@ export default {
       this.editor = monaco.editor.create(that.$refs.monacoEditor, {
         value: that.codeVal || that.code, // 编辑器初始显示的内容
         language: that.language, // 支持的语言
-        theme: 'vs-dark', // 编辑器主题样式
+        theme: 'vs-light', // 编辑器主题样式
         selectOnLineNumbers: true, // 显示行号
         editorOptions: that.editorOptions,
         colorDecorators: true, // 颜色装饰器

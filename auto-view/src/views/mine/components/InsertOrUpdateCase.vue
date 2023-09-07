@@ -64,7 +64,13 @@
                   </a-table>
                 </a-tab-pane>
                 <a-tab-pane key="2" tab="Body">
-                  <MonacoEditor ref="initRequestData" height="400px" language="json" :code="initJson"/>
+                  <MonacoEditor
+                    ref="initRequestData"
+                    height="400px"
+                    language="json"
+                    :is-dark="true"
+                    :font-size="16"
+                    :code="initJson"/>
                 </a-tab-pane>
                 <a-tab-pane key="3" tab="Header">
                   <a-table :columns="ParamsColumns" :data-source="headersParams" :pagination="false">

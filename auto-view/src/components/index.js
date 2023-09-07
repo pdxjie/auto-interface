@@ -29,6 +29,7 @@ import ExceptionPage from '@/components/Exception'
 import StandardFormRow from '@/components/StandardFormRow'
 import ArticleListContent from '@/components/ArticleListContent'
 import MonacoEditor from '@/components/MonacoEditor/index'
+import MonacoEditorNotDark from '@/components/MonacoEditorNotDark/index.vue'
 
 export {
   AvatarList,
@@ -60,5 +61,6 @@ export {
   TagSelect,
   StandardFormRow,
   ArticleListContent,
-  MonacoEditor
+  MonacoEditor,
+  MonacoEditorNotDark
 }
