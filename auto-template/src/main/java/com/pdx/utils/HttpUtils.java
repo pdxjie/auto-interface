@@ -23,7 +23,6 @@ import java.util.Set;
  **/
 public class HttpUtils {
 
-
     /**
      * 发送 POST 请求
      * @param url 请求地址
@@ -34,8 +33,6 @@ public class HttpUtils {
         HttpClient httpClient = HttpClientBuilder.create().build();
         // 创建HttpPost对象
         HttpPost httpPost = new HttpPost(url);
-        // 定义 JSON 参数
-        String secretKey = "auto_lab";
         // 设置参数
         httpPost.setEntity(new StringEntity(jsonObject.toString(), StandardCharsets.UTF_8));
         httpPost.setHeader("Content-Type", "application/json");
