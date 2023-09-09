@@ -71,8 +71,6 @@ export default {
       if (this.editor) {
         if (nVal !== this.editor.getValue()) {
           this.editor.setValue(nVal)
-          this.editor.getAction(['editor.action.formatDocument']).run()
-          this.editor.setValue(this.editor.getValue())
         }
       }
     }
