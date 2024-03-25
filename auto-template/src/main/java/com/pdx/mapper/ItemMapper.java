@@ -2,6 +2,7 @@ package com.pdx.mapper;
 
 import com.pdx.entity.Item;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import com.pdx.entity.TestCase;
 import com.pdx.modal.dto.ItemDto;
 import org.apache.ibatis.annotations.Param;
 
@@ -35,4 +36,12 @@ public interface ItemMapper extends BaseMapper<Item> {
      * @return
      */
     Integer queryItemTotalCount(String userId);
+
+    /**
+     * 查询项目下的用例详情
+     *
+     * @param id
+     * @return
+     */
+    List<TestCase> selectTestCaseByItemId(@Param("itemId") String id);
 }

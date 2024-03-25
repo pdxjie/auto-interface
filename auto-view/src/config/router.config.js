@@ -1,6 +1,5 @@
 // eslint-disable-next-line
 import { UserLayout, BasicLayout, RouteView, BlankLayout } from '@/layouts'
-import { bxAnaalyse } from '@/core/icons'
 
 export const asyncRouterMap = [
 
@@ -9,26 +8,8 @@ export const asyncRouterMap = [
     name: 'index',
     component: BasicLayout,
     meta: { title: '首页' },
-    redirect: '/dashboard/analysis',
+    redirect: '/mine/card',
     children: [
-      // dashboard
-      {
-        path: '/dashboard',
-        name: 'dashboard',
-        redirect: '/dashboard/analysis',
-        component: RouteView,
-        // 隐藏子菜单
-        hideChildrenInMenu: true,
-        meta: { title: '仪表盘', icon: bxAnaalyse },
-        children: [
-          {
-            path: '/dashboard/analysis',
-            name: 'Analysis',
-            component: () => import('@/views/dashboard/Analysis'),
-            meta: { title: '仪表盘', keepAlive: false }
-          }
-        ]
-      },
       {
         path: '/mine',
         name: 'mine',
@@ -43,6 +24,23 @@ export const asyncRouterMap = [
             name: 'MineCard',
             component: () => import('@/views/mine/index.vue'),
             meta: { title: '我的项目' }
+          }
+        ]
+      },
+      {
+        path: '/square',
+        name: 'square',
+        component: BlankLayout,
+        // 隐藏子菜单
+        hideChildrenInMenu: true,
+        redirect: '/square/card',
+        meta: { title: '项目广场', icon: 'table' },
+        children: [
+          {
+            path: '/square/card',
+            name: 'SquareCard',
+            component: () => import('@/views/square/index.vue'),
+            meta: { title: '项目广场' }
           }
         ]
       },

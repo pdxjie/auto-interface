@@ -32,7 +32,9 @@
           </a-button>
         </template>
         <template v-else>
-          <a-card class="ant-pro-pages-list-projects-card custom-card" hoverable>
+          <a-card class="ant-pro-pages-list-projects-card custom-card" hoverable style="position: relative;">
+            <a-tag style="position: absolute;right: 5px;top: 5px;" v-if="item.type === 1" color="red">私有</a-tag>
+            <a-tag style="position: absolute;right: 5px;top: 5px;" v-else color="green">公共</a-tag>
             <template slot="actions" class="ant-card-actions">
               <span v-if="item.itemOwner">
                 <a-tooltip placement="top">
@@ -99,7 +101,7 @@
               </div>
               <div class="admin">
                 <div>
-                  <span class="title" style="margin-right: 5px"></span><span>负责人</span> <span class="margin-l-10">派大星</span>
+                  <span class="title" style="margin-right: 5px"></span><span>负责人</span> <span class="margin-l-10">{{ item.nickName }}</span>
                 </div>
               </div>
             </div>
@@ -118,7 +120,7 @@ import { DEVICE_TYPE } from '@/utils/device'
 import { mapGetters, mapState } from 'vuex'
 import moment from 'moment'
 import { TagSelect, StandardFormRow, Ellipsis, AvatarList } from '@/components'
-import { homePages, removeItemById } from '@/api/item'
+import { cloneItem, homePages, removeItemById } from '@/api/item'
 import ItemOperate from '@/views/mine/components/ItemOperate'
 const TagSelectOption = TagSelect.Option
 const AvatarListItem = AvatarList.Item
@@ -198,11 +200,15 @@ export default {
       this.$router.push({
         path: '/auto',
         query: {
-          id: id
+          id: id,
+          public: false
         }
       })
     },
-    copyAddress (item) {},
+    async copyAddress (item) {
+      await cloneItem(item.id)
+      this.searchOperate()
+    },
     updateItemInfo (item) {
       this.type = 'update'
       this.$refs.itemOperate.itemInfo = item

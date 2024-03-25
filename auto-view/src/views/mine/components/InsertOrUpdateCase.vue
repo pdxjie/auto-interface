@@ -10,17 +10,13 @@
       :after-visible-change="afterVisibleChange"
       @close="onClose"
     >
-      <a-form :form="form" layout="vertical" hide-required-mark>
+      <a-form :form="caseVo" layout="vertical" hide-required-mark>
         <a-row :gutter="16">
           <a-col :span="24">
             <a-form-item label="用例名称">
               <a-input
-                v-decorator="[
-                  'name',
-                  {
-                    rules: [{ required: true, message: '请输入用例名称！' }],
-                  },
-                ]"
+                v-model='caseVo.name'
+                @input='inputCaseName'
                 placeholder="请输入用例名称"
               />
             </a-form-item>
@@ -109,7 +105,11 @@
         </a-row>
         <a-row :gutter="16">
           <a-col :span="24">
-            <a-form-item label="业务描述">
+            <a-form-item>
+              <span slot="label" class='display-flex align-items justify-between'>
+                <span>业务描述</span>
+                <a-button icon='redo' @click='generateDescription'></a-button>
+              </span>
               <v-md-editor
                 :class="isMobile ? 'custom' : ''"
                 v-model="caseVo.description"
@@ -159,6 +159,7 @@ import { mapState } from 'vuex'
 import { DEVICE_TYPE } from '@/utils/device'
 import MonacoEditor from '@/components/MonacoEditor'
 import { caseCreate, caseUpdate } from '@/api/case'
+import { Prompts } from '@/constant/prompts'
 export default {
   name: 'InsertOrUpdateCase',
   components: { MonacoEditor },
@@ -183,8 +184,10 @@ export default {
       caseVo: {
         caseRank: 1,
         requestUrl: 'http://localhost:8080',
-        requestType: 1
+        requestType: 1,
+        description: ''
       },
+      resultData: '',
       initJson: '',
       initResponse: '',
       isPost: true,
@@ -221,14 +224,100 @@ export default {
       device: state => state.app.device
     })
   },
+  created () {
+    this.caseVo = {}
+    this.form.resetFields({})
+  },
   methods: {
     onClose () {
+      this.caseVo = {}
+      this.form.resetFields({})
       this.visible = false
     },
     afterVisibleChange () {
     },
     isMobile () {
       return this.device === DEVICE_TYPE.MOBILE
+    },
+    inputCaseName (e) {
+      console.log(e, 'eeeee')
+    },
+    generateDescription () {
+      if (this.caseVo.name === undefined || this.caseVo.name === '') {
+        this.$message.error('请先填写用例名称！')
+        return
+      }
+      if (this.caseVo.requestUrl === undefined || this.caseVo.requestUrl === '') {
+        this.$message.error('请先填写请求地址！')
+        return
+      }
+      if (this.caseVo.requestType === undefined || this.caseVo.requestType === '') {
+        this.$message.error('请先选择请求类型！')
+        return
+      }
+      let prompt = Prompts.serviceDescription
+      let paramsPrompt = ''
+      let getParams = ''
+      // GET
+      if (this.paramsData.length !== 1 || (this.paramsData[0].paramsKey !== '' && this.paramsData[0].paramsVal !== '')) {
+        this.paramsData.forEach(param => {
+          getParams += '参数' + param.paramsKey + '的值为' + param.paramsVal + '，'
+        })
+      }
+      let postParams = ''
+      postParams += this.$refs.initRequestData && this.$refs.initRequestData.codeVal
+      if (postParams.trim() === '') {
+        const obj = JSON.parse(this.caseVo.requestData)
+        for (const objKey in obj) {
+          postParams += '参数' + objKey + '的值为' + obj[objKey] + '，'
+        }
+      }
+      paramsPrompt = getParams + postParams
+      if (this.headersParams.length === 1 && (this.headersParams[0].paramsKey === '' || this.headersParams[0].paramsVal === '')) {
+        prompt.replaceAll('#{requestHeaders},', '没有')
+      } else {
+        let headersPrompt = ''
+        this.headersParams.forEach(header => {
+          headersPrompt += '请求头' + header.paramsKey + '的值为' + header.paramsVal + '，'
+        })
+        prompt = prompt.replaceAll('#{requestHeaders}', headersPrompt)
+      }
+      let requestType = ''
+      // 请求类型
+      if (this.caseVo.requestType === 1) {
+        requestType = 'GET'
+      } else if (this.caseVo.requestType === 2) {
+        requestType = 'POST'
+      } else if (this.caseVo.requestType === 3) {
+        requestType = 'PUT'
+      } else if (this.caseVo.requestType === 4) {
+        requestType = 'DELETE'
+      }
+      prompt = prompt.replaceAll('#{interfaceName}', this.caseVo.name)
+        .replaceAll('#{interfaceUrl}', this.caseVo.requestUrl)
+        .replaceAll('#{interfaceParams}', paramsPrompt)
+        .replaceAll('#{interfaceType}', requestType)
+      const eventsource = new EventSource('http://localhost:8080/ai/business?message=' + prompt)
+      const that = this
+      eventsource.onmessage = function (event) {
+        console.log(event.data)
+        const content = event.data
+        that.$nextTick(() => {
+          if (content) {
+            that.caseVo.description = that.caseVo.description + content
+          }
+        })
+        // try {
+        //   const content = JSON.parse(event.data) ? JSON.parse(event.data).choices[0].delta.content : ''
+        //   console.log(content, 'content')
+        //   if (content) {
+        //     that.caseVo.description = content
+        //   }
+        // } catch (e) {
+        //   that.caseVo.description += ''
+        //   eventsource.close()
+        // }
+      }
     },
     handleUploadImageAnalysis () {},
     handleChange () {},
@@ -243,7 +332,6 @@ export default {
           // 解构赋值
           const { name } = values
           // 封装数据
-          this.caseVo.name = name
           this.caseVo.requestData = this.$refs.initRequestData && this.$refs.initRequestData.codeVal
           this.caseVo.expectResponse = this.$refs.responseData && this.$refs.responseData.codeVal
           this.caseVo.moduleId = this.currentModule.id

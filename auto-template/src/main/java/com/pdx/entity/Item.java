@@ -13,7 +13,7 @@ import java.util.Date;
 
 /**
  * <p>
- * 
+ *
  * </p>
  *
  * @author 派同学
@@ -54,4 +54,7 @@ public class Item implements Serializable {
 
     @ApiModelProperty(value = "状态 1 未开始 2 进行中 3 已结束")
     private Integer status;
+
+    @ApiModelProperty(value = "类型 公共 OR 私有")
+    private Integer type;
 }

@@ -18,6 +18,7 @@ import com.pdx.response.Result;
 import com.pdx.service.TestCaseService;
 import com.pdx.utils.HttpUtils;
 import com.pdx.utils.XmlUtils;
+import net.dreamlu.mica.core.utils.StringUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
@@ -143,12 +144,20 @@ public class TestCaseServiceImpl extends ServiceImpl<TestCaseMapper, TestCase> i
         }
         // 判断是否有预期结果
         if (StringUtils.isEmpty(caseInfo.getExpectResponse())) {
+            String code = String.valueOf(result.get("code"));
+            if (StringUtil.isNotBlank(code) && code.equalsIgnoreCase("200")) {
+                caseInfo.setStatus(3);
+                caseInfo.setUpdateTime(new Date());
+                baseMapper.updateById(caseInfo);
+                resultMap.put("isSuccess", true);
+            } else {
+                caseInfo.setStatus(4);
+                caseInfo.setUpdateTime(new Date());
+                baseMapper.updateById(caseInfo);
+                resultMap.put("isSuccess", false);
+            }
             // 如果没有预期结果，则用例执行结果为成功，返回接口实际返回结果
-            caseInfo.setStatus(3);
-            caseInfo.setUpdateTime(new Date());
-            baseMapper.updateById(caseInfo);
             resultMap.put("result", result);
-            resultMap.put("isSuccess", true);
             return Result.success(resultMap);
         } else {
             boolean success = HttpUtils.isSuccess(expectData, result);

@@ -1,12 +1,6 @@
 <template>
   <div class="user-wrapper">
     <div class="content-box">
-      <a href="https://pro.loacg.com/docs/getting-started" target="_blank">
-        <span class="action">
-          <a-icon type="question-circle-o"></a-icon>
-        </span>
-      </a>
-      <notice-icon class="action"/>
       <a-dropdown>
         <span class="action ant-dropdown-link user-dropdown-menu">
           <a-avatar class="avatar" size="small" :src="avatar()"/>
@@ -19,17 +13,6 @@
               <span>个人中心</span>
             </router-link>
           </a-menu-item>
-          <a-menu-item key="1">
-            <router-link :to="{ name: 'settings' }">
-              <a-icon type="setting"/>
-              <span>账户设置</span>
-            </router-link>
-          </a-menu-item>
-          <a-menu-item key="2">
-            <a-icon type="setting"/>
-            <span>管理中心</span>
-          </a-menu-item>
-          <a-menu-divider/>
           <a-menu-item key="3">
             <a href="javascript:;" @click="handleLogout">
               <a-icon type="logout"/>

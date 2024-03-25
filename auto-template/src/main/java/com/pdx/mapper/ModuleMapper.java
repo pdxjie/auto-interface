@@ -2,6 +2,9 @@ package com.pdx.mapper;
 
 import com.pdx.entity.Module;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import org.apache.ibatis.annotations.Param;
+
+import java.util.List;
 
 /**
  * <p>
@@ -13,4 +16,5 @@ import com.baomidou.mybatisplus.core.mapper.BaseMapper;
  */
 public interface ModuleMapper extends BaseMapper<Module> {
 
+    List<Module> selectModulesByItemId(@Param("itemId") String itemId);
 }

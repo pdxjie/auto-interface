@@ -9,6 +9,7 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+import retrofit2.http.GET;
 
 /**
  * <p>
@@ -30,6 +31,12 @@ public class ItemController {
     @PostMapping("/homePages")
     public Result<?> homePages (@RequestBody QueryItemVo vo) {
         return itemService.homePages(vo);
+    }
+
+    @ApiOperation(value = "公共项目广场")
+    @RequestMapping(value = "/public", method = RequestMethod.POST)
+    public Result<?> publicItem (@RequestBody(required = false) QueryItemVo vo) {
+        return itemService.publicItem(vo);
     }
 
     @ApiOperation(value = "添加项目")
@@ -57,10 +64,21 @@ public class ItemController {
     }
 
     @ApiOperation(value = "克隆项目")
-    @PostMapping("/clone")
-    public Result<?> cloneItem() {
-        // TODO 复制项目
-        return null;
+    @GetMapping("/clone")
+    public Result<?> cloneItem(@RequestParam("itemId") String itemId) {
+        return itemService.cloneItem(itemId);
+    }
+
+    @ApiOperation(value = "点赞的项目")
+    @PostMapping("/like")
+    public Result<?> likeItem(@RequestBody QueryItemVo vo) {
+        return itemService.likeItem(vo);
+    }
+
+    @ApiOperation(value = "收藏的项目")
+    @PostMapping("/collect")
+    public Result<?> collectItem(@RequestBody QueryItemVo vo) {
+        return itemService.collectItem(vo);
     }
 }
 

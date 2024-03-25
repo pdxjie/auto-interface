@@ -68,3 +68,10 @@ export function messageHistory () {
     method: 'get'
   })
 }
+
+export const aiChat = (message) => {
+  return axios({
+    url: '/ai/chat?message=' + message,
+    method: 'GET'
+  })
+}

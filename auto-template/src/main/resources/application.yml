@@ -7,7 +7,7 @@ spring:
     driver-class-name: com.mysql.cj.jdbc.Driver
     url: jdbc:mysql://localhost:3306/auto_trial?useUnicode=true&characterEncoding=utf8&serverTimezone=GMT%2B8
     username: root
-    password: root233031
+    password: 233031
     type: com.alibaba.druid.pool.DruidDataSource
   # Redis
   redis:
@@ -65,7 +65,18 @@ mybatis-plus:
 aliyun:
   oss:
     file:
-      endpoint: "[aliyun endpoint]"
-      keyid: "[aliyun keyId]"
-      keysecret: "[aliyun keySecret]"
-      bucketname: "[aliyun bucketName]"
+      endpoint: oss-cn-beijing.aliyuncs.com
+      keyid: LTAI5tCroixxjG2GbLgCVC4Y
+      keysecret: jM1gUo6w3p1SqGtHgWURXj6sTcaiCT
+      bucketname: edu-2330
+
+# ChatGLM SDK Config
+chatglm:
+  sdk:
+    config:
+      # 状态；true = 开启、false 关闭
+      enabled: true
+      # 官网地址
+      api-host: https://open.bigmodel.cn/
+      # 官网申请 https://open.bigmodel.cn/usercenter/apikeys
+      api-secret-key: 81f5036a702eed3fecede37ce001f306.EHMEkfGWP8uTjtQD

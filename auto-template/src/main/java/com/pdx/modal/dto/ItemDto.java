@@ -47,8 +47,26 @@ public class ItemDto implements Serializable {
     private Integer identity;
 
     @ApiModelProperty(value = "自动化测试进度")
-    private Integer percent;
+    private double percent;
 
     @ApiModelProperty(value = "状态 1 未开始 2 进行中 3 已结束")
     private Integer status;
+
+    @ApiModelProperty(value = "类型 公共 OR 私有")
+    private Integer type;
+
+    @ApiModelProperty(value = "是否点赞")
+    private boolean isLike;
+
+    @ApiModelProperty(value = "是否收藏")
+    private boolean isCollect;
+
+    @ApiModelProperty(value = "点赞数")
+    private Integer likeCount;
+
+    @ApiModelProperty(value = "收藏数")
+    private Integer collectCount;
+
+    @ApiModelProperty(value = "用户头像")
+    private String avatar;
 }

@@ -36,4 +36,18 @@ public interface ItemService extends IService<Item> {
     Result<?> selectInfo(String id);
 
     Result<?> removeItemById(String id);
+
+    /**
+     * 克隆项目
+     *
+     * @param itemId
+     * @return
+     */
+    Result<?> cloneItem(String itemId);
+
+    Result<?> publicItem(QueryItemVo vo);
+
+    Result<?> likeItem(QueryItemVo vo);
+
+    Result<?> collectItem(QueryItemVo vo);
 }

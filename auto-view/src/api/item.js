@@ -65,3 +65,60 @@ export const removeItemById = (id) => {
     method: 'DELETE'
   })
 }
+
+/**
+ * 克隆项目
+ * @param {String} itemId
+ * @returns
+ */
+export const cloneItem = (itemId) => {
+  return axios({
+    url: '/pdx/item/clone?itemId=' + itemId,
+    method: 'GET'
+  })
+}
+
+/**
+ * 公共广场
+ * @param {Object} params
+ * @returns
+ */
+export const publishItems = (data) => {
+  return axios({
+    url: '/pdx/item/public',
+    method: 'POST',
+    data
+  })
+}
+
+export const likeItem = (vo) => {
+  return axios({
+    url: '/like/like',
+    method: 'POST',
+    data: vo
+  })
+}
+
+export const unlikeItem = (vo) => {
+  return axios({
+    url: '/like/unlike',
+    method: 'POST',
+    data: vo
+  })
+}
+
+export const myLikeItems = (vo) => {
+  return axios({
+    url: '/pdx/item/like',
+    method: 'POST',
+    data: vo
+  })
+}
+
+export const myCollectItems = (vo) => {
+  return axios({
+    url: '/pdx/item/collect',
+    method: 'POST',
+    data: vo
+  })
+}

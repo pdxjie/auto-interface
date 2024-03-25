@@ -12,7 +12,7 @@ import lombok.EqualsAndHashCode;
 
 /**
  * <p>
- * 
+ *
  * </p>
  *
  * @author 派同学
@@ -44,6 +44,4 @@ public class UserItem implements Serializable {
 
     @ApiModelProperty(value = "修改时间")
     private Date updateTime;
-
-
 }

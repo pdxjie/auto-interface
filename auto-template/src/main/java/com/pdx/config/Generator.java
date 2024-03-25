@@ -37,7 +37,7 @@ public class Generator {
         dsc.setUrl("jdbc:mysql://localhost:3306/auto_trial?useUnicode=true&characterEncoding=utf8&serverTimezone=GMT%2B8");
         dsc.setDriverName("com.mysql.cj.jdbc.Driver");
         dsc.setUsername("root");
-        dsc.setPassword("root233031");
+        dsc.setPassword("233031");
         dsc.setDbType(DbType.MYSQL);
         mpg.setDataSource(dsc);
 
@@ -51,15 +51,10 @@ public class Generator {
         pc.setMapper("mapper");
         mpg.setPackageInfo(pc);
 
-        TemplateConfig templateConfig = new TemplateConfig();
-        templateConfig.setController("templates/controller.java.vm");
-
-        mpg.setTemplate(templateConfig);
-
         // 5、策略配置
         StrategyConfig strategy = new StrategyConfig();
         //strategy.setInclude("ks_\\w*");设置要映射的表名
-        strategy.setInclude("demo");
+        strategy.setInclude("like_item");
         strategy.setNaming(NamingStrategy.underline_to_camel);//数据库表映射到实体的命名策略
         strategy.setTablePrefix("auto_");//设置表前缀不生成
 

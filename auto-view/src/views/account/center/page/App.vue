@@ -1,113 +1,135 @@
 <template>
-  <div class="app-list">
-    <a-list
-      :grid="{ gutter: 24, lg: 3, md: 2, sm: 1, xs: 1 }"
-      :dataSource="dataSource">
-      <a-list-item slot="renderItem" slot-scope="item">
-        <a-card :hoverable="true">
-          <a-card-meta>
-            <div style="margin-bottom: 3px" slot="title">{{ item.title }}</div>
-            <a-avatar class="card-avatar" slot="avatar" :src="item.avatar" size="small"/>
-            <div class="meta-cardInfo" slot="description">
-              <div>
-                <p>活跃用户</p>
-                <p>
-                  <span>{{ item.activeUser }}<span>万</span></span>
-                </p>
-              </div>
-              <div>
-                <p>新增用户</p>
-                <p>{{ item.newUser | NumberFormat }}</p>
-              </div>
-            </div>
-          </a-card-meta>
-          <template class="ant-card-actions" slot="actions">
-            <a>
-              <a-icon type="download"/>
-            </a>
-            <a>
-              <a-icon type="edit"/>
-            </a>
-            <a>
-              <a-icon type="share-alt"/>
-            </a>
-            <a>
-              <a-dropdown>
-                <a class="ant-dropdown-link" href="javascript:;">
-                  <a-icon type="ellipsis"/>
-                </a>
-                <a-menu slot="overlay">
-                  <a-menu-item>
-                    <a href="javascript:;">1st menu item</a>
-                  </a-menu-item>
-                  <a-menu-item>
-                    <a href="javascript:;">2nd menu item</a>
-                  </a-menu-item>
-                  <a-menu-item>
-                    <a href="javascript:;">3rd menu item</a>
-                  </a-menu-item>
-                </a-menu>
-              </a-dropdown>
-            </a>
-          </template>
-        </a-card>
+  <a-card style='border-radius: 5px;'>
+    <a-list item-layout='vertical' size='large' :pagination='pagination' :loading='loading' :data-source='listData'>
+      <a-list-item slot='renderItem' key='item.title' slot-scope='item'>
+        <template slot='actions'>
+            <span style='display: flex;align-items: center;gap: 5px'>
+              <a-icon  type='star-o' @click='collectItemInfo(item)' v-if='!item.collect'></a-icon>
+              <a-icon type='star-o' @click='unCollectItemInfo(item)' v-if='item.collect' style='color: #f3ca32'></a-icon>
+              <span>{{ item.collectCount }}</span>
+            </span>
+        </template>
+        <img
+          slot='extra'
+          width='272'
+          alt='logo'
+          :src='item.cover'
+          @click='lookDetail(item.id)'
+          style='height: 150px;object-fit: cover'/>
+        <a-list-item-meta @click='lookDetail(item.id)' :description='item.description'>
+          <a slot='title'>{{ item.name }}</a>
+          <a-avatar slot='avatar' :src='item.avatar' />
+        </a-list-item-meta>
       </a-list-item>
     </a-list>
-
-  </div>
+  </a-card>
 </template>
-
 <script>
-const dataSource = []
-for (let i = 0; i < 11; i++) {
-  dataSource.push({
-    title: 'Alipay',
-    avatar: 'https://gw.alipayobjects.com/zos/rmsportal/WdGqmHpayyMjiEhcKoVE.png',
-    activeUser: 17,
-    newUser: 1700
-  })
-}
+import { likeItem, myCollectItems, unlikeItem } from '@/api/item'
 
 export default {
-  name: 'Article',
-  components: {},
   data () {
     return {
-      dataSource
+      listData: [],
+      itemVo: {
+        name: '',
+        current: 1,
+        pageSize: 5
+      },
+      pagination: {
+        size: 'large',
+        current: 1,
+        pageSize: 10,
+        total: 0,
+        showTotal: (total, range) => {
+          return ' 共' + total + '条'
+        }
+      },
+      loading: false
+    }
+  },
+  computed: {
+    userId () {
+      return this.$store.getters.userInfo.userInfo.userId
+    }
+  },
+  async created () {
+    await this.getPublishItems()
+  },
+  methods: {
+    // 表格改变时触发
+    handleTableChange (pagination, filters, sorter) {
+      this.pagination = pagination
+      this.itemVo.current = pagination.current
+      this.itemVo.pageSize = pagination.pageSize
+      this.getPublishItems()
+    },
+    async getPublishItems (loading = true) {
+      this.loading = loading
+      const { data } = await myCollectItems(this.itemVo)
+      this.listData = data.items
+      this.pagination.total = data.total
+      this.loading = false
+      console.log(data, 'publish items')
+    },
+    async likeItemInfo (item) {
+      const vo = {
+        userId: this.userId,
+        itemId: item.id,
+        type: 1
+      }
+      const data = await likeItem(vo)
+      if (data.code === 200) {
+        await this.getPublishItems(false)
+      }
+      console.log('like item')
+    },
+    async unlikeItemInfo (item) {
+      const vo = {
+        userId: this.userId,
+        itemId: item.id,
+        type: 1
+      }
+      const data = await unlikeItem(vo)
+      if (data.code === 200) {
+        await this.getPublishItems(false)
+      }
+      console.log('unlike item')
+    },
+    async collectItemInfo (item) {
+      const vo = {
+        userId: this.userId,
+        itemId: item.id,
+        type: 2
+      }
+      const data = await likeItem(vo)
+      if (data.code === 200) {
+        await this.getPublishItems(false)
+      }
+      console.log('like item')
+    },
+    async unCollectItemInfo (item) {
+      const vo = {
+        userId: this.userId,
+        itemId: item.id,
+        type: 2
+      }
+      const data = await unlikeItem(vo)
+      if (data.code === 200) {
+        await this.getPublishItems(false)
+      }
+      console.log('unlike item')
+    },
+    lookDetail (id) {
+      this.$router.push({
+        path: '/auto',
+        query: {
+          id: id,
+          public: true
+        }
+      })
     }
   }
 }
 </script>
-
-<style lang="less" scoped>
-
-  .app-list {
-
-    .meta-cardInfo {
-      zoom: 1;
-      margin-top: 16px;
-
-      > div {
-        position: relative;
-        text-align: left;
-        float: left;
-        width: 50%;
-
-        p {
-          line-height: 32px;
-          font-size: 24px;
-          margin: 0;
-
-          &:first-child {
-            color: rgba(0, 0, 0, .45);
-            font-size: 12px;
-            line-height: 20px;
-            margin-bottom: 4px;
-          }
-        }
-
-      }
-    }
-  }
-
-</style>
+<style></style>

@@ -24,12 +24,8 @@
           </a-input>
           <a-dropdown-button @click="sendRequest" type="primary" style="margin-left: 10px">
             发送
-            <a-menu slot="overlay" @click="sendAndDownload">
-              <a-menu-item key="1"> 发送并下载 </a-menu-item>
-            </a-menu>
             <a-icon slot="icon" type="down" />
           </a-dropdown-button>
-          <a-button icon="save" style="margin-left: 10px" size="default">保存用例</a-button>
         </div>
         <div>
           <a-tabs default-active-key="1" @change="callback">

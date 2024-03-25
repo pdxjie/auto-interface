@@ -59,23 +59,6 @@
               </a-tag>
             </div>
           </div>
-          <a-divider :dashed="true"/>
-
-          <div class="account-center-team">
-            <div class="teamTitle">团队</div>
-            <a-spin :spinning="teamSpinning">
-              <div class="members">
-                <a-row>
-                  <a-col :span="12" v-for="(item, index) in teams" :key="index">
-                    <a>
-                      <a-avatar size="small" :src="item.avatar"/>
-                      <span class="member">{{ item.name }}</span>
-                    </a>
-                  </a-col>
-                </a-row>
-              </div>
-            </a-spin>
-          </div>
         </a-card>
       </a-col>
       <a-col :md="24" :lg="17">
@@ -88,7 +71,7 @@
         >
           <article-page v-if="noTitleKey === 'article'"></article-page>
           <app-page v-else-if="noTitleKey === 'app'"></app-page>
-          <project-page v-else-if="noTitleKey === 'project'"></project-page>
+          <project-page v-else-if="noTitleKey === 'project' && role === 'ADMIN'"></project-page>
         </a-card>
       </a-col>
     </a-row>
@@ -117,20 +100,20 @@ export default {
       tagInputValue: '',
 
       teams: [],
-      teamSpinning: true,
+      teamSpinning: false,
 
       tabListNoTitle: [
         {
           key: 'article',
-          tab: '文章(8)'
+          tab: '点赞/收藏项目'
         },
         {
           key: 'app',
-          tab: '应用(8)'
+          tab: '收藏项目'
         },
         {
           key: 'project',
-          tab: '项目(8)'
+          tab: '用户管理'
         }
       ],
       noTitleKey: 'app'
@@ -139,15 +122,13 @@ export default {
   mounted () {
     this.getTeams()
   },
+  computed: {
+    role () {
+      return this.$store.getters.roles
+    }
+  },
   methods: {
     ...mapGetters(['nickname', 'avatar']),
-
-    getTeams () {
-      this.$http.get('/workplace/teams').then(res => {
-        this.teams = res.result
-        this.teamSpinning = false
-      })
-    },
 
     handleTabChange (key, type) {
       this[type] = key

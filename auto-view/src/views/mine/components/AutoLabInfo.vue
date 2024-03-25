@@ -2,7 +2,7 @@
   <div class="auto-lab-info" style="margin-top: -20px">
     <div class="margin-t-16 card-layout">
       <div class="margin-b-16">
-        <a-button @click="insertCase" type="primary" style="height: 40px" icon="plus">创建用例</a-button>
+        <a-button v-if='!isPublic' @click="insertCase" type="primary" style="height: 40px" icon="plus">创建用例</a-button>
         <a-button @click="toOnline" :icon="isOnline ? 'rollback' : 'ci'" style="height: 40px;margin-left: 10px">{{ isOnline ? '返回用例' : '在线执行' }}</a-button>
       </div>
       <a-card style="border-radius: 8px">
@@ -10,14 +10,11 @@
           <a-layout-sider style="background: #fff;padding-right: 10px;border-right: 1px solid #eee;min-width: 220px;position:relative;">
             <div class="margin-t-16">
               <!-- 选择项目 -->
-              <div>
+              <div v-if='!isPublic'>
                 <span class="margin-r-10">项目:</span>
-                <a-select default-value="lucy" style="width: 130px" @change="handleChangeItem">
-                  <a-select-option value="jack">
-                    周计划优化
-                  </a-select-option>
-                  <a-select-option value="lucy">
-                    未读消息发送邮件服务
+                <a-select v-model="currentProjectId" style="width: 130px" @change="handleChangeItem">
+                  <a-select-option :value="item.id" v-for="item in projects" :key="item.id">
+                    {{ item.name }}
                   </a-select-option>
                 </a-select>
               </div>
@@ -34,9 +31,10 @@
               </a-directory-tree>
             </div>
             <div class="bottom-operate display-flex position-absolute" style="bottom: 10px;left: 0px">
-              <a-button @click="insertModule" type="primary" icon="plus" shape="circle"></a-button>
-              <a-button @click="updateModuleInfo" icon="edit" class="margin-l-10" shape="circle"></a-button>
+              <a-button v-if='!isPublic' @click="insertModule" type="primary" icon="plus" shape="circle"></a-button>
+              <a-button v-if='!isPublic' @click="updateModuleInfo" icon="edit" class="margin-l-10" shape="circle"></a-button>
               <a-button
+                v-if='!isPublic'
                 type="danger"
                 @click="removeModule"
                 ghost
@@ -50,7 +48,7 @@
               <div v-if="!isOnline">
                 <div class="display-flex justify-between">
                   <div class="margin-t-16">
-                    <div class="font-size-18 font-w-500">全部用例（234）</div>
+                    <div class="font-size-18 font-w-500">全部用例（{{ caseData.length  }}）</div>
                   </div>
                   <div class="margin-t-16 display-flex align-items">
                     <a-button style="margin-right: 10px" type="primary" @click="batchRunCaseInfo" v-show="selectedRowKeys.length > 1">批量执行</a-button>
@@ -87,13 +85,10 @@
                         <a-icon @click="runCase(record)" v-if="record.status !== 2" style="font-size: 20px;cursor: pointer" type="play-circle" />
                         <a-icon v-if="record.status === 2" style="font-size: 20px;cursor: pointer" type="pause-circle" />
                         <a-dropdown style="margin-left: 10px;margin-top: -8px" :trigger="['click']">
-                          <a class="ant-dropdown-link" @click="e => e.preventDefault()">
+                          <a v-if='!isPublic' class="ant-dropdown-link" @click="e => e.preventDefault()">
                             ...
                           </a>
                           <a-menu slot="overlay">
-                            <a-menu-item>
-                              <a href="javascript:;">测试报告</a>
-                            </a-menu-item>
                             <a-menu-item>
                               <a @click="updateCaseInfo(record)">编辑用例</a>
                             </a-menu-item>
@@ -142,6 +137,7 @@ import InsertOrUpdateCase from '@/views/mine/components/InsertOrUpdateCase'
 import { batchRunCase, caseDelete, casePage, caseRun } from '@/api/case'
 import PreviewBusinessDesc from '@/views/mine/components/PreviewBusinessDesc.vue'
 import ExecuteOnline from '@/views/mine/components/ExecuteOnline.vue'
+import { homePages } from '@/api/item'
 
 export default {
   name: 'AutoLabInfo',
@@ -171,14 +167,20 @@ export default {
       currentModule: null,
       loading: false,
       selectedRowKeys: [],
-      isOnline: false // 页面显示方式
+      isOnline: false, // 页面显示方式
+      projects: [],
+      currentProjectId: '', // 当前的项目 Id
+      isPublic: false // 是否来自公共广场
     }
   },
   mounted () {
+    this.myProject()
     this.moduleListByItemId(this.$route.query.id)
+    this.currentProjectId = this.$route.query.id
   },
   created () {
     this.moduleListByItemId(this.$route.query.id)
+    this.isPublic = JSON.parse(this.$route.query.public)
   },
   methods: {
     // 在线执行
@@ -199,6 +201,15 @@ export default {
       this.caseData = data.cases
       this.pagination.total = data.total
       this.loading = false
+    },
+    async myProject () {
+      const { data } = await homePages({
+        name: '',
+        current: 1,
+        pageSize: 1000
+      })
+      this.projects = data.items
+      console.log(data, 'data....')
     },
     async moduleListByItemId (itemId) {
       const { data } = await getModuleList(itemId)
@@ -233,10 +244,11 @@ export default {
       this.currentParentId = keys[0]
       const { data } = await moduleInfo(this.currentParentId)
       this.currentModule = data
-      if (this.currentParentId === this.$route.query.id || this.currentModule.parentId !== '0') {
-        this.queryCaseVo.moduleId = this.currentParentId
-        this.searchOperate()
-      }
+      // if (this.currentParentId === this.$route.query.id || this.currentModule.parentId !== '0') {
+
+      // }
+      this.queryCaseVo.moduleId = this.currentParentId
+      this.searchOperate()
     },
     handleChangeItem () {},
     insertModule () {

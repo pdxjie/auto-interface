@@ -31,4 +31,15 @@
             WHERE auto_user_item.user_id = #{userId}
         ))
     </select>
+
+    <select id="selectTestCaseByItemId" resultType="com.pdx.entity.TestCase">
+        SELECT
+            atc.*
+        FROM auto_test_case atc
+                 LEFT JOIN auto_module_case amc ON atc.id = amc.case_id
+                 LEFT JOIN auto_module am ON am.id = amc.module_id
+                 LEFT JOIN auto_module_item ami ON ami.module_id = am.id
+                 LEFT JOIN auto_item ai ON ai.id = ami.item_id
+        WHERE ai.id = #{itemId}
+    </select>
 </mapper>

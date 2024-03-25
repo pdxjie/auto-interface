@@ -96,7 +96,8 @@ export default {
         dateLine: '',
         authority: 2,
         cover: '',
-        status: 0
+        status: 0,
+        type: 1
       },
       iconUrl: '',
       loading: false,
@@ -127,7 +128,8 @@ export default {
         dateLine: this.itemInfo.dateLine,
         authority: 2,
         cover: this.iconUrl,
-        status: 1
+        status: 1,
+        type: this.itemInfo.type
       }
       let data
       if (this.type === 'insert') {
@@ -148,12 +150,21 @@ export default {
     },
     handleSelectChange (key) {},
     updatePrivateOption (key) {
+      this.privateOption = key.target.checked
+      if (this.privateOption) {
+        this.publicOption = false
+        this.itemInfo.type = 1
+      }
     },
     dealDateTime (date) {
       return moment(date).format('YYYY-MM-DD')
     },
     updatePublicOption (key) {
-      this.$message.warning('暂不支持公开项目！')
+      this.publicOption = key.target.checked
+      if (this.publicOption) {
+        this.privateOption = false
+        this.itemInfo.type = 2
+      }
     },
     selectedImageUrl (url) {
       this.itemInfo.cover = url
